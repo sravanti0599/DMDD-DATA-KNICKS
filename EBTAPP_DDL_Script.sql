@@ -92,7 +92,7 @@ CREATE TABLE admin (
     adminid   NUMBER,
     firstname VARCHAR2(100) NOT NULL,
     lastname  VARCHAR2(100) NOT NULL,
-    ssn       VARCHAR2(11) NOT NULL,
+    ssn       VARCHAR2(11) UNIQUE NOT NULL,
     address   VARCHAR2(100) NOT NULL,
     phone     VARCHAR2(20),
     email     VARCHAR2(255),
@@ -126,7 +126,7 @@ CREATE TABLE ebtapplication (
     proofofresidence   BLOB NOT NULL,
     proofofidentity    BLOB NOT NULL,
     benefitprogramname VARCHAR2(100),
-    status             VARCHAR2(50),
+    status             VARCHAR2(50) DEFAULT 'PENDING' CHECK (UPPER(status) IN ('PENDING', 'APPROVED', 'REJECTED')),
     users_userid       NUMBER NOT NULL,
     admin_adminid     NUMBER NOT NULL
 );
@@ -151,7 +151,7 @@ CREATE TABLE ebtschedule (
     scheduleid            NUMBER,
     disbursementfrequency VARCHAR2(50),
     nextdisbursementdate  DATE,
-    benefitprogramname    VARCHAR2(50)
+    benefitprogramname    VARCHAR2(50) UNIQUE NOT NULL
 );
 
 ALTER TABLE ebtschedule ADD CONSTRAINT ebtschedule_pk PRIMARY KEY ( scheduleid );
@@ -208,7 +208,7 @@ CREATE TABLE users (
     userid    NUMBER,
     firstname VARCHAR2(50) NOT NULL,
     lastname  VARCHAR2(50) NOT NULL,
-    ssn       VARCHAR2(11) NOT NULL,
+    ssn       VARCHAR2(11) UNIQUE NOT NULL,
     address   VARCHAR2(100) NOT NULL,
     phone     VARCHAR2(20),
     email     VARCHAR2(255),
