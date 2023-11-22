@@ -1,4 +1,4 @@
---ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
 SET SERVEROUTPUT ON;
 
 --Procedure to insert admin information
@@ -346,7 +346,7 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error: User already has an active card');
     WHEN OTHERS THEN 
         -- Raise exception for other errors
-        RAISE_APPLICATION_ERROR(-20003, 'Error in the INSERT: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE(SQLERRM);
 END;
 /
 
@@ -385,7 +385,6 @@ EXEC  insertEBTCard('4567890123456789', SYSDATE, 'InActive', 4321, SYSDATE + 365
 EXEC  insertEBTCard ('3456789012345678', SYSDATE, 'Active', 9876, SYSDATE + 365, 3);
 EXEC  insertEBTCard( '1234567890123456', SYSDATE, 'Active', 1234, SYSDATE + 365, 1);
 EXEC  insertEBTCard( '2345678901234567', SYSDATE, 'Active', 5678, SYSDATE + 365, 2);
-
 
 
 select * from admin;
