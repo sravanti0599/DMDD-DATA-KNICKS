@@ -105,7 +105,7 @@ select * from item;
 BEGIN
     BEGIN 
         INSERT INTO transactions (transactionid, amount, status, recorded_date, merchant_merchantid, ebtcard_cardid)
-        VALUES (transactions_seq.nextval, 2.19, 'Completed', SYSDATE, 1, 1);
+        VALUES (transactions_seq.nextval, 2.19, 'SUCCESS', SYSDATE, 1, 1);
     EXCEPTION
      WHEN OTHERS THEN 
         DBMS_OUTPUT.PUT_LINE('Error in the First INSERT: ' || SQLERRM);
@@ -113,14 +113,14 @@ BEGIN
 
     BEGIN
          INSERT INTO transactions (transactionid, amount, status, recorded_date, merchant_merchantid, ebtcard_cardid)
-        VALUES (transactions_seq.nextval, 1.99, 'Completed', SYSDATE, 2, 2);
+        VALUES (transactions_seq.nextval, 1.99, 'SUCCESS', SYSDATE, 2, 2);
     EXCEPTION
         WHEN OTHERS THEN 
             DBMS_OUTPUT.PUT_LINE('Error in the Second INSERT: ' || SQLERRM);
     END;
     BEGIN
          INSERT INTO transactions (transactionid, amount, status, recorded_date, merchant_merchantid, ebtcard_cardid)
-        VALUES (transactions_seq.nextval, 9.17, 'Completed', SYSDATE, 3, 3);
+        VALUES (transactions_seq.nextval, 9.17, 'SUCCESS', SYSDATE, 3, 3);
     EXCEPTION
         WHEN OTHERS THEN 
             DBMS_OUTPUT.PUT_LINE('Error in the Third INSERT: ' || SQLERRM);
@@ -128,7 +128,7 @@ BEGIN
 
     BEGIN
          INSERT INTO transactions (transactionid, amount, status, recorded_date, merchant_merchantid, ebtcard_cardid)
-        VALUES (transactions_seq.nextval, 5.48, 'Completed', SYSDATE, 4, 4);
+        VALUES (transactions_seq.nextval, 5.48, 'SUCCESS', SYSDATE, 4, 4);
     EXCEPTION
         WHEN OTHERS THEN 
             DBMS_OUTPUT.PUT_LINE('Error in the Fourth INSERT: ' || SQLERRM);
@@ -137,7 +137,7 @@ BEGIN
     BEGIN
     
          INSERT INTO transactions (transactionid, amount, status, recorded_date, merchant_merchantid, ebtcard_cardid)
-        VALUES (transactions_seq.nextval, 9.94, 'Completed', SYSDATE, 5, 5);
+        VALUES (transactions_seq.nextval, 9.94, 'SUCCESS', SYSDATE, 5, 5);
     EXCEPTION
          WHEN OTHERS THEN 
             DBMS_OUTPUT.PUT_LINE('Error in the fifth INSERT: ' || SQLERRM);

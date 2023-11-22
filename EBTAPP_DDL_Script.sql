@@ -174,8 +174,8 @@ CREATE TABLE merchant (
     type          VARCHAR2(50) NOT NULL,
     name          VARCHAR2(50) NOT NULL,
     address       VARCHAR2(100),
-    accountnumber VARCHAR2(200) UNIQUE NOT NULL,
-    routingnumber VARCHAR2(100) NOT NULL,
+    accountnumber VARCHAR2(200) UNIQUE,
+    routingnumber VARCHAR2(100),
     archive       CHAR(1)
 );
 
