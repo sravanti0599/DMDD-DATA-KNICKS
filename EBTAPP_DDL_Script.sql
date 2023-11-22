@@ -138,7 +138,7 @@ CREATE TABLE ebtcard (
     cardid               NUMBER,
     cardnumber           VARCHAR2(16) NOT NULL,
     activationdate       DATE NOT NULL,
-    statusofcard         VARCHAR2(20) NOT NULL,
+    statusofcard         VARCHAR2(20)  DEFAULT 'ACTIVE' CHECK (UPPER(statusofcard) IN ('ACTIVE', 'INACTIVE', 'BLOCKED')),
     pin                  NUMBER(4),
     expirydate           DATE NOT NULL,
     ebtaccount_accountid NUMBER NOT NULL
@@ -195,7 +195,7 @@ CREATE SEQUENCE transactions_seq;
 CREATE TABLE transactions (
     transactionid       NUMBER,
     amount              NUMBER(20, 2) NOT NULL,
-    status              VARCHAR2(20) NOT NULL,
+    status              VARCHAR2(20)  NOT NULL,
     recorded_date       DATE NOT NULL,
     merchant_merchantid NUMBER NOT NULL,
     ebtcard_cardid      NUMBER NOT NULL
