@@ -76,4 +76,6 @@ JOIN
 JOIN 
     view_users u on u.userid = eap.users_userid;
 
--- select * from transaction_summary_view;
+ select * from transaction_summary_view;
+ select * from ebtaccount_balance_view;
+ select * from pending_ebt_applications_view;
