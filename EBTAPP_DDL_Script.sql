@@ -133,7 +133,9 @@ CREATE TABLE ebtapplication (
     benefitprogramname VARCHAR2(100),
     status             VARCHAR2(50) DEFAULT 'PENDING' CHECK (UPPER(status) IN ('PENDING', 'APPROVED', 'REJECTED')),
     users_userid       NUMBER NOT NULL,
-    admin_adminid     NUMBER NOT NULL
+    admin_adminid     NUMBER NOT NULL,
+    created_at DATE DEFAULT SYSDATE NOT NULL,
+    updated_at DATE DEFAULT SYSDATE
 );
 
 ALTER TABLE ebtapplication ADD CONSTRAINT ebtapplication_pk PRIMARY KEY ( applicationid );

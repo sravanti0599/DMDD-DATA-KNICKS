@@ -45,7 +45,7 @@ CREATE OR REPLACE FUNCTION generateCardNumber RETURN ebtcard.cardnumber%TYPE IS
    v_prefix VARCHAR2(4) := '4000'; -- for now we choose a random prefix
    v_sequence NUMBER;
 BEGIN
-   SELECT card_number_seq.NEXTVAL INTO v_sequence FROM dual;
+   SELECT ebtcard_number_seq.NEXTVAL INTO v_sequence FROM dual;
    RETURN v_prefix || LPAD(TO_CHAR(v_sequence), 12, '0');
 END;
 /
@@ -209,7 +209,8 @@ CREATE OR REPLACE PROCEDURE createEBTApplication (
     p_immigrationproof EBTAPPLICATION.immigrationproof%TYPE,
     p_proofofresidence EBTAPPLICATION.proofofresidence%TYPE,
     p_proofofidentity EBTAPPLICATION.proofofidentity%TYPE,
-    p_users_userid EBTAPPLICATION.users_userid%TYPE
+    p_users_userid EBTAPPLICATION.users_userid%TYPE,
+    p_created_at EBTAPPLICATION.created_at%TYPE := NULL
 )
 AS
     v_pending_count NUMBER;
@@ -238,7 +239,8 @@ BEGIN
         benefitprogramname,
         status,
         users_userid,
-        admin_adminid
+        admin_adminid,
+        created_at
     )
     VALUES (
         ebtapplication_seq.nextval,
@@ -249,7 +251,8 @@ BEGIN
         'EBT Program MA',
         'PENDING',
         p_users_userid,
-        v_random_admin_id
+        v_random_admin_id,
+        NVL(p_created_at, SYSTIMESTAMP)
     );
 
     COMMIT;
@@ -275,7 +278,7 @@ AS
 BEGIN
     -- Update the status of the application
     UPDATE EBTAPPLICATION
-    SET status = p_status
+    SET status = p_status, updated_at=SYSDATE
     WHERE applicationid = p_applicationid;
 
     -- Retrieve the admin id for logging or further processing

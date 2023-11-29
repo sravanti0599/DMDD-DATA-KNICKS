@@ -39,14 +39,18 @@ WHERE
     e.status = 'Pending' or e.status = 'PENDING';
 
 
+--last_month_summary_view
+CREATE OR REPLACE VIEW monthly_application_counts AS
+SELECT
+    TO_CHAR(created_at, 'YYYY-MM') AS month,
+    COUNT(*) AS created_count,
+    SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) AS REJECTED_APPLICATIONS,
+    SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) AS APPROVED_APPLICATIONS
 
--- select * from view_transactionitemlist;
--- SELECT * FROM view_transactions;
--- select * from view_ebtapplication;
--- select * from pending_ebt_applications_view;
--- SELECT * FROM view_ebtcard;
--- select * from users;
--- select * from view_ebtaccount;
+FROM
+    EBTAPPLICATION
+GROUP BY
+    TO_CHAR(created_at, 'YYYY-MM');
 
 --transaction_summary_view
 CREATE or replace VIEW transaction_summary_view AS
@@ -79,3 +83,4 @@ JOIN
  select * from transaction_summary_view;
  select * from ebtaccount_balance_view;
  select * from pending_ebt_applications_view;
+ select * from monthly_application_counts;
