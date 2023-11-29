@@ -353,23 +353,14 @@ BEGIN
     INTO v_existing_count
     FROM ebtcard
     WHERE ebtaccount_accountid = p_ebtaccount_accountid
-      AND statusofcard = 'Active';
+      AND statusofcard = 'ACTIVE';
 
     -- Raise exception if the user already has an active card
     IF v_existing_count > 0 THEN
         RAISE UserHasActiveCard;
     END IF;
 
-
     v_cardnumber:= generateCardNumber();
-    
-    -- Check if the generated card number already exists
-    SELECT COUNT(*)
-    INTO v_existing_count
-    FROM ebtcard
-    WHERE cardnumber = v_cardnumber;
-
-    -- Card number is unique, and the user doesn't have an active card, proceed with the insertion
     INSERT INTO ebtcard (
         cardid,
         cardnumber,
@@ -382,7 +373,7 @@ BEGIN
         ebtcard_seq.nextval,
         v_cardnumber,
         SYSDATE, -- Use the current date as the activation date
-        'PENDING', -- Default status to 'ACTIVE'
+        'PENDING', -- Default status to 'PENDING' , will be ACTIVE once the pin is set
         ADD_MONTHS(SYSDATE, 24), -- Expiry date is 2 years from now
         p_ebtaccount_accountid
     );
