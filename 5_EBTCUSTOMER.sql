@@ -7,15 +7,15 @@ exec insertUser('Sravanti', 'M', '987-95-2321', '456 Oak St', '5555678101', 'sra
 exec insertUser('Sravya', 'K', '987-75-4121', '456 Oak St', '5555678202', 'sravya.K@email.com', 'P@ss1234'); 
 
 
-                            --TODO: ADD VALIDATE PASSWORD, RESET PASSWORD, UPDATE ADMIN DETAILS --
-
+                    --TODO: ADD VALIDATE PASSWORD, RESET PASSWORD, UPDATE ADMIN DETAILS --
 
 
 EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), empty_blob(), empty_blob(), empty_blob(), 1);
-EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'),utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'), 2);
+EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'),utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'),2);
 EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'),3);
-EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'), 4);
-EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'), 5);
+EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'),4);
+EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'),5);
+
 
 select * from users;
 select * from ebtapplication;

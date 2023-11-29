@@ -1,5 +1,27 @@
+--TODO : Should be moved to a single file
+
 ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
 SET SERVEROUTPUT ON;
+
+
+--FUNCTIONS
+
+CREATE OR REPLACE FUNCTION getAdminIdforAssignment RETURN EBTAPPLICATION.admin_adminid%TYPE IS
+    v_random_admin_id EBTAPPLICATION.admin_adminid%TYPE;
+BEGIN
+    -- Randomly select an admin ID based on the number of applications assigned
+    SELECT adminid
+    INTO v_random_admin_id
+    FROM (
+        SELECT adminid,
+               ROW_NUMBER() OVER (ORDER BY DBMS_RANDOM.VALUE) as rn
+        FROM admin
+    )
+    WHERE rn = 1;
+    RETURN v_random_admin_id;
+END getAdminIdforAssignment;
+/
+
 
 --Procedure to insert admin information
 CREATE OR REPLACE PROCEDURE insertAdmin (
@@ -153,19 +175,20 @@ END;
 /
 
 --Procedure to add ebt applications
-CREATE OR REPLACE PROCEDURE insertEBTApplication (
+CREATE OR REPLACE PROCEDURE createEBTApplication (
     p_proofofincome EBTAPPLICATION.proofofincome%TYPE,
     p_immigrationproof EBTAPPLICATION.immigrationproof%TYPE,
     p_proofofresidence EBTAPPLICATION.proofofresidence%TYPE,
     p_proofofidentity EBTAPPLICATION.proofofidentity%TYPE,
-    p_status EBTAPPLICATION.status%TYPE,
-    p_users_userid EBTAPPLICATION.users_userid%TYPE,
-    p_admin_adminid EBTAPPLICATION.admin_adminid%TYPE
+    p_users_userid EBTAPPLICATION.users_userid%TYPE
 )
 AS
     v_pending_count NUMBER;
+    v_random_admin_id EBTAPPLICATION.admin_adminid%TYPE;
     PendingApplicationExists EXCEPTION;
 BEGIN
+
+    --TODO: DECIDE TO CHECK PENDING AS WELL AS SUCCESS SCENARIOS.
     SELECT COUNT(*)
     INTO v_pending_count
     FROM EBTAPPLICATION
@@ -176,6 +199,7 @@ BEGIN
         RAISE PendingApplicationExists;
     END IF;
 
+    v_random_admin_id := getAdminIdforAssignment;
     INSERT INTO EBTAPPLICATION (
         applicationid,
         proofofincome,
@@ -194,9 +218,9 @@ BEGIN
         p_proofofresidence,
         p_proofofidentity,
         'EBT Program MA',
-        p_status,
+        'PENDING',
         p_users_userid,
-        p_admin_adminid
+        v_random_admin_id
     );
 
     COMMIT;
@@ -211,8 +235,186 @@ EXCEPTION
 END;
 /
 
+
+-- Procedure to update the status of an EBT application
+CREATE OR REPLACE PROCEDURE updateEBTApplicationStatus (
+    p_applicationid EBTAPPLICATION.applicationid%TYPE,
+    p_status EBTAPPLICATION.status%TYPE
+)
+AS
+    v_admin_id ADMIN.adminid%TYPE;
+BEGIN
+    -- Update the status of the application
+    UPDATE EBTAPPLICATION
+    SET status = p_status
+    WHERE applicationid = p_applicationid;
+
+    -- Retrieve the adminName for logging or further processing
+    SELECT adminid
+    INTO v_admin_id
+    FROM ADMIN
+    WHERE adminid = (SELECT admin_adminid FROM EBTAPPLICATION WHERE applicationid = p_applicationid);
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('EBT Application ' || p_status || ' successfully by ' || v_admin_id);
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Raise custom exception for other errors
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
+
+
+
+--generation of account number
+CREATE OR REPLACE FUNCTION generateAccountNumber
+    RETURN ebtaccount.accountnumber%TYPE
+IS
+    v_account_number ebtaccount.accountnumber%TYPE;
+BEGIN
+    SELECT '1000'||LPAD('001', 3, '0')||LPAD(TO_CHAR(account_number_seq.nextval), 7, '0')
+    INTO v_account_number
+    FROM dual;
+
+    RETURN v_account_number;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handle exceptions or log errors as needed
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        RETURN NULL; -- Or handle the error in a way that makes sense for your application
+END;
+/
+
+--stored procedure to  insertEBTAccount
+CREATE OR REPLACE PROCEDURE addEBTAccount (
+    p_accountid OUT ebtaccount.accountid%TYPE,
+    p_ebtapplication_applicationid ebtaccount.ebtapplication_applicationid%TYPE,
+    p_ebtschedule_scheduleid ebtaccount.ebtschedule_scheduleid%TYPE
+)
+AS
+    v_account_number ebtaccount.accountnumber%TYPE;
+    
+BEGIN
+    
+    v_account_number := generateAccountNumber();
+    p_accountid:= ebtaccount_seq.nextval;
+    INSERT INTO ebtaccount (
+        accountid,
+        accountnumber,
+        foodbalance,
+        cashbalance,
+        ebtapplication_applicationid,
+        ebtschedule_scheduleid
+    )
+    VALUES (
+        p_accountid,
+        v_account_number,
+        0,
+        0,
+        p_ebtapplication_applicationid,
+        p_ebtschedule_scheduleid
+    );
+    DBMS_OUTPUT.PUT_LINE('EBT Account inserted successfully');
+EXCEPTION
+    WHEN OTHERS THEN 
+        RAISE_APPLICATION_ERROR(-20001, 'Error in the Account Creation: ' || SQLERRM);
+END;
+/
+
+
+--stored procedure to insert EBT Card
+CREATE OR REPLACE PROCEDURE addEBTCard (
+    p_ebtaccount_accountid ebtcard.ebtaccount_accountid%TYPE
+)
+AS
+    v_cardnumber ebtcard.cardnumber%TYPE;
+    v_existing_count NUMBER;
+
+    -- Custom Exceptions
+    UserHasActiveCard EXCEPTION;
+BEGIN
+
+    -- Check if the user already has an active card
+    SELECT COUNT(*)
+    INTO v_existing_count
+    FROM ebtcard
+    WHERE ebtaccount_accountid = p_ebtaccount_accountid
+      AND statusofcard = 'Active';
+    -- Raise exception if the user already has an active card
+    IF v_existing_count > 0 THEN
+        RAISE UserHasActiveCard;
+    END IF;
+
+    -- TODO: Generate a unique 16-digit card number,with every four digits witha proper meaning
+    SELECT '4'||LPAD(to_char(ebtcard_number_seq.nextval), 14, '0')
+    INTO v_cardnumber
+    FROM dual;
+
+    -- Check if the generated card number already exists
+    SELECT COUNT(*)
+    INTO v_existing_count
+    FROM ebtcard
+    WHERE cardnumber = v_cardnumber;
+
+    -- Card number is unique, and the user doesn't have an active card, proceed with the insertion
+    INSERT INTO ebtcard (
+        cardid,
+        cardnumber,
+        activationdate,
+        statusofcard,
+        expirydate,
+        ebtaccount_accountid
+    )
+    VALUES (
+        ebtcard_seq.nextval,
+        v_cardnumber,
+        SYSDATE, -- Use the current date as the activation date
+        'PENDING', -- Default status to 'ACTIVE'
+        ADD_MONTHS(SYSDATE, 24), -- Expiry date is 2 years from now
+        p_ebtaccount_accountid
+    );
+    DBMS_OUTPUT.PUT_LINE('EBT Card inserted successfully');
+
+EXCEPTION
+    WHEN UserHasActiveCard THEN
+        RAISE_APPLICATION_ERROR(-20001, 'User Already Has an Active Card!');
+    WHEN OTHERS THEN 
+        -- Raise exception for other errors
+        RAISE_APPLICATION_ERROR(-20001, 'There is an issue while trying to genrate card details! ' || SQLERRM);
+END;
+/
+
+
+
+-- Trigger to create account and card on application approval
+CREATE OR REPLACE TRIGGER createAccountAndCard
+AFTER UPDATE ON EBTAPPLICATION
+FOR EACH ROW
+WHEN (NEW.status = 'APPROVED')
+DECLARE
+    v_account_id ebtaccount.accountid%TYPE;
+    v_card_id ebtcard.cardid%TYPE;
+    v_schedule_id ebtschedule.scheduleid%TYPE;
+BEGIN
+    
+    select scheduleid into v_schedule_id from ebtschedule where benefitprogramname = 'EBT Program MA';
+    
+    --TODO: FURTHER VERIFY FOR SAY IF THE TRIGGER HAS AN ISSUE,IS THE COMMIT HAPPENING ORIS IT ROLLED BACK
+    -- Create an account
+    addEBTAccount(v_account_id, :NEW.applicationid, v_schedule_id);
+    -- Create a card
+    addEBTCard(v_account_id);
+    DBMS_OUTPUT.PUT_LINE('Your application has been approved. Account and Card created successfully for user!' || :NEW.users_userid);
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Raise custom exception for other errors
+        DBMS_OUTPUT.PUT_LINE('Could not create Card and Account..' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20001, 'Could not Create an Account/card due to some reason ' || SQLERRM);
+END;
+/
+
+
 --Stored Procedure to insert EBT Schedule
-CREATE OR REPLACE PROCEDURE insertEBTSchedule (
+CREATE OR REPLACE PROCEDURE addEBTSchedule (
     p_interval_in_days VARCHAR2,
     p_disbursementfrequency VARCHAR2 DEFAULT 'Monthly',
     p_benefitprogramname VARCHAR2 DEFAULT 'EBT Program MA'
@@ -239,157 +441,3 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error in the INSERT: ' || SQLERRM);
 END;
 /
-
-
---stored procedure to  insertEBTAccount
-CREATE OR REPLACE PROCEDURE insertEBTAccount (
-    p_accountnumber ebtaccount.accountnumber%TYPE,
-    p_foodbalance ebtaccount.foodbalance%TYPE,
-    p_cashbalance ebtaccount.cashbalance%TYPE,
-    p_ebtapplication_applicationid ebtaccount.ebtapplication_applicationid%TYPE,
-    p_ebtschedule_scheduleid ebtaccount.ebtschedule_scheduleid%TYPE
-)
-AS
-BEGIN
-    INSERT INTO ebtaccount (
-        accountid,
-        accountnumber,
-        foodbalance,
-        cashbalance,
-        ebtapplication_applicationid,
-        ebtschedule_scheduleid
-    )
-    VALUES (
-        ebtaccount_seq.nextval,
-        p_accountnumber,
-        p_foodbalance,
-        p_cashbalance,
-        p_ebtapplication_applicationid,
-        p_ebtschedule_scheduleid
-    );
-
-    COMMIT;
-    DBMS_OUTPUT.PUT_LINE('EBT Account inserted successfully');
-EXCEPTION
-    WHEN OTHERS THEN 
-        DBMS_OUTPUT.PUT_LINE('Error in the INSERT: ' || SQLERRM);
-END;
-/
-
---stored procedure to insert EBT Card
-CREATE OR REPLACE PROCEDURE insertEBTCard (
-    p_cardnumber ebtcard.cardnumber%TYPE,
-    p_activationdate ebtcard.activationdate%TYPE,
-    p_statusofcard ebtcard.statusofcard%TYPE,
-    p_pin ebtcard.pin%TYPE,
-    p_expirydate ebtcard.expirydate%TYPE,
-    p_ebtaccount_accountid ebtcard.ebtaccount_accountid%TYPE
-)
-AS
-    v_existing_count NUMBER;
-
-    -- Custom Exceptions
-    DuplicateCardNumber EXCEPTION;
-    UserHasActiveCard EXCEPTION;
-
-BEGIN
-    -- Check if the card number already exists
-    SELECT COUNT(*)
-    INTO v_existing_count
-    FROM ebtcard
-    WHERE cardnumber = p_cardnumber;
-
-    -- Raise exception if the card number is not unique
-    IF v_existing_count > 0 THEN
-        RAISE DuplicateCardNumber;
-    END IF;
-
-    -- Check if the user already has an active card
-    SELECT COUNT(*)
-    INTO v_existing_count
-    FROM ebtcard
-    WHERE ebtaccount_accountid = p_ebtaccount_accountid
-      AND statusofcard = 'Active';
-
-    -- Raise exception if the user already has an active card
-    IF v_existing_count > 0 THEN
-        RAISE UserHasActiveCard;
-    END IF;
-
-    -- Card number is unique, and the user doesn't have an active card, proceed with the insertion
-    INSERT INTO ebtcard (
-        cardid,
-        cardnumber,
-        activationdate,
-        statusofcard,
-        pin,
-        expirydate,
-        ebtaccount_accountid
-    )
-    VALUES (
-        ebtcard_seq.nextval,
-        p_cardnumber,
-        p_activationdate,
-        p_statusofcard,
-        p_pin,
-        p_expirydate,
-        p_ebtaccount_accountid
-    );
-
-    COMMIT;
-    DBMS_OUTPUT.PUT_LINE('EBT Card inserted successfully');
-
-EXCEPTION
-    WHEN DuplicateCardNumber THEN
-        DBMS_OUTPUT.PUT_LINE('Error: There is an existing card with the same number');
-    WHEN UserHasActiveCard THEN
-        DBMS_OUTPUT.PUT_LINE('Error: User already has an active card');
-    WHEN OTHERS THEN 
-        -- Raise exception for other errors
-        DBMS_OUTPUT.PUT_LINE(SQLERRM);
-END;
-/
-
-
-exec insertUser('Sanjana', 'Doe', '123-45-6789', '123 Main St', '5551239476', 'sanjana.doe@email.com', 'P@ss1234');
-exec insertUser( 'Sai Kiran', 'M', '987-65-4321', '456 Oak St', '5555678776', 'kiran.M@email.com', 'P@ss1234');
-exec insertUser('Mithali', 'K', '987-95-5421', '456 Oak St', '5557778901', 'mithali.K@email.com', 'P@ss1234');
-exec insertUser('Sravanti', 'M', '987-95-2321', '456 Oak St', '5555678101', 'sravanti.M@email.com', 'P@ss1234');
-exec insertUser('Sravya', 'K', '987-75-4121', '456 Oak St', '5555678202', 'sravya.K@email.com', 'P@ss1234'); 
-
-
-
-exec insertAdmin('AdminOne', 'Doe', '123-45-6789', '123 Main St', '5551234517', 'AdminOne.doe@email.com', 'Passs1234');
-exec insertAdmin('AdminTwo', 'M', '987-65-4321', '456 Oak St', '5551284567', 'AdminTwo.M@email.com', 'P@ss12345');
-exec insertAdmin('Admin Three', 'K', '987-95-5421', '456 Oak St', '5551734567', 'AdminThree.K@email.com', 'P@ss1234');
-exec insertAdmin( 'Admin Four', 'M', '987-95-2321', '456 Oak St', '5551264567', 'AdminFour.M@email.com', 'P@ss1234');
-exec insertAdmin('Admin Five', 'Kanchi', '987-75-4121', '456 Oak St', '5551434567', 'AdminFive.Kanchi@email.com', 'P@ss1234');
-
-
-EXEC insertEBTApplication(utl_raw.cast_to_raw('proof of income'), empty_blob(), empty_blob(), empty_blob(), 'Approved', 1, 1);
-EXEC insertEBTApplication(utl_raw.cast_to_raw('proof of income'),utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'), 'Approved', 2, 2);
-EXEC insertEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'), 'Rejected', 3, 3);
-EXEC insertEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'), 'Approved', 4, 4);
-EXEC insertEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'), 'Pending', 5, 5);
-
-
-EXEC  insertEBTSchedule('30');
-
-EXEC  insertEBTAccount( 'E123456', 500.00, 100.00, 1, 1);
-EXEC  insertEBTAccount( 'E234567', 800.00, 200.00, 2, 1);
-EXEC  insertEBTAccount ('E345678', 600.00, 150.00, 4, 1);
-
-
-EXEC  insertEBTCard( '5678901234567890', SYSDATE, 'Inactive', 8765, SYSDATE + 365, 2);
-EXEC  insertEBTCard('4567890123456789', SYSDATE, 'InActive', 4321, SYSDATE + 365, 1);
-EXEC  insertEBTCard ('3456789012345678', SYSDATE, 'Active', 9876, SYSDATE + 365, 3);
-EXEC  insertEBTCard( '1234567890123456', SYSDATE, 'Active', 1234, SYSDATE + 365, 1);
-EXEC  insertEBTCard( '2345678901234567', SYSDATE, 'Active', 5678, SYSDATE + 365, 2);
-
-
-select * from admin;
-select * from users;
-select * from ebtapplication;
-select *  from ebtschedule;
-select * from ebtaccount;
-select * from ebtcard;

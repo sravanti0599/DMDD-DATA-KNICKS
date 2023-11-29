@@ -70,6 +70,10 @@ BEGIN
             SELECT 'ADMIN' FROM DUAL
 			UNION ALL
 			SELECT 'ADMIN_SEQ' FROM DUAL
+            UNION ALL
+			SELECT 'ACCOUNT_NUMBER_SEQ' FROM DUAL
+            UNION ALL
+			SELECT 'EBTCARD_NUMBER_SEQ' FROM DUAL
         )
         SELECT I.OBJ_NAME, O.OBJECT_TYPE
         FROM INVT_OBJ I 
@@ -102,6 +106,7 @@ CREATE TABLE admin (
 ALTER TABLE admin ADD CONSTRAINT admin_pk PRIMARY KEY ( adminid );
 
 CREATE SEQUENCE ebtaccount_seq;
+create sequence account_number_seq;
 CREATE TABLE ebtaccount (
     accountid                    NUMBER,
     accountnumber                VARCHAR2(200) UNIQUE NOT NULL,
@@ -134,11 +139,12 @@ CREATE TABLE ebtapplication (
 ALTER TABLE ebtapplication ADD CONSTRAINT ebtapplication_pk PRIMARY KEY ( applicationid );
 
 CREATE SEQUENCE ebtcard_seq;
+create sequence ebtcard_number_seq;
 CREATE TABLE ebtcard (
     cardid               NUMBER,
     cardnumber           VARCHAR2(16) UNIQUE NOT NULL,
     activationdate       DATE NOT NULL,
-    statusofcard         VARCHAR2(20)  DEFAULT 'ACTIVE' CHECK (UPPER(statusofcard) IN ('ACTIVE', 'INACTIVE', 'BLOCKED')) NOT NULL,
+    statusofcard         VARCHAR2(20)  DEFAULT 'ACTIVE' CHECK (UPPER(statusofcard) IN ('ACTIVE', 'INACTIVE', 'PENDING','BLOCKED')) NOT NULL,
     pin                  NUMBER(4),
     expirydate           DATE NOT NULL,
     ebtaccount_accountid NUMBER NOT NULL
