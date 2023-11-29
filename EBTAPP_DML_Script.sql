@@ -23,6 +23,35 @@ END getAdminIdforAssignment;
 /
 
 
+--generation of account number
+CREATE OR REPLACE FUNCTION generateAccountNumber
+    RETURN ebtaccount.accountnumber%TYPE
+IS
+    v_account_number ebtaccount.accountnumber%TYPE;
+BEGIN
+    SELECT '1000'||LPAD('001', 3, '0')||LPAD(TO_CHAR(account_number_seq.nextval), 7, '0')
+    INTO v_account_number
+    FROM dual;
+
+    RETURN v_account_number;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
+
+--generation of card number
+CREATE OR REPLACE FUNCTION generateCardNumber RETURN ebtcard.cardnumber%TYPE IS
+   v_prefix VARCHAR2(4) := '4000'; -- for now we choose a random prefix
+   v_sequence NUMBER;
+BEGIN
+   SELECT card_number_seq.NEXTVAL INTO v_sequence FROM dual;
+   RETURN v_prefix || LPAD(TO_CHAR(v_sequence), 12, '0');
+END;
+/
+
+
+-------------------Stored Procedures-------------
 --Procedure to insert admin information
 CREATE OR REPLACE PROCEDURE insertAdmin (
     firstname IN admin.firstname%type,
@@ -157,7 +186,7 @@ BEGIN
         p_password
     );
 
-    COMMIT; -- Adding a COMMIT to persist changes to the database
+    COMMIT; 
 
     DBMS_OUTPUT.PUT_LINE('User inserted successfully');
 EXCEPTION
@@ -249,7 +278,7 @@ BEGIN
     SET status = p_status
     WHERE applicationid = p_applicationid;
 
-    -- Retrieve the adminName for logging or further processing
+    -- Retrieve the admin id for logging or further processing
     SELECT adminid
     INTO v_admin_id
     FROM ADMIN
@@ -265,24 +294,7 @@ END;
 
 
 
---generation of account number
-CREATE OR REPLACE FUNCTION generateAccountNumber
-    RETURN ebtaccount.accountnumber%TYPE
-IS
-    v_account_number ebtaccount.accountnumber%TYPE;
-BEGIN
-    SELECT '1000'||LPAD('001', 3, '0')||LPAD(TO_CHAR(account_number_seq.nextval), 7, '0')
-    INTO v_account_number
-    FROM dual;
 
-    RETURN v_account_number;
-EXCEPTION
-    WHEN OTHERS THEN
-        -- Handle exceptions or log errors as needed
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
-        RETURN NULL; -- Or handle the error in a way that makes sense for your application
-END;
-/
 
 --stored procedure to  insertEBTAccount
 CREATE OR REPLACE PROCEDURE addEBTAccount (
@@ -339,16 +351,15 @@ BEGIN
     FROM ebtcard
     WHERE ebtaccount_accountid = p_ebtaccount_accountid
       AND statusofcard = 'Active';
+
     -- Raise exception if the user already has an active card
     IF v_existing_count > 0 THEN
         RAISE UserHasActiveCard;
     END IF;
 
-    -- TODO: Generate a unique 16-digit card number,with every four digits witha proper meaning
-    SELECT '4'||LPAD(to_char(ebtcard_number_seq.nextval), 14, '0')
-    INTO v_cardnumber
-    FROM dual;
 
+    v_cardnumber:= generateCardNumber();
+    
     -- Check if the generated card number already exists
     SELECT COUNT(*)
     INTO v_existing_count
