@@ -222,7 +222,7 @@ BEGIN
     SELECT COUNT(*)
     INTO v_pending_count
     FROM EBTAPPLICATION
-    WHERE users_userid = p_users_userid AND status = 'Pending';
+    WHERE users_userid = p_users_userid AND status = 'PENDING';
 
     -- Raise custom exception if there is an existing record with 'Pending' status
     IF v_pending_count > 0 THEN

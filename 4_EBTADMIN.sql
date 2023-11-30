@@ -26,8 +26,8 @@ exec insertAdmin('Thomas', 'Cooper', '987-50-6789', '1717 Elm St, Worcester, MA'
 exec insertAdmin('Victoria', 'Perez', '987-60-7890', '1818 Maple St, Boston, MA', '5554321098', 'Victoria.Perez@email.com', 'P@ss7654');
 exec insertAdmin('William', 'Rogers', '987-70-8901', '1919 Oak St, Cambridge, MA', '5553210987', 'William.Rogers@email.com', 'P@ss4321');
 exec insertAdmin('Xander', 'Gonzalez', '987-80-9012', '2020 Pine St, Lowell, MA', '5552109876', 'Xander.Gonzalez@email.com', 'P@ss1098');
-exec insertAdmin('Yasmine', 'Torres', '987-90-1234', '2121 Elm St, Springfield, MA', '5551098765', 'Yasmine.Torres@email.com', 'P@ss6543');
-exec insertAdmin('Zachary', 'Lopez', '987-01-2345', '2222 Maple St, Worcester, MA', '5550987654', 'Zachary.Lopez@email.com', 'P@ss2109');
+exec insertAdmin('Yasmine', 'Torres', '987-90-1239', '2121 Elm St, Springfield, MA', '5551098765', 'Yasmine.Torres@email.com', 'P@ss6543');
+exec insertAdmin('Zachary', 'Lopez', '987-01-2341', '2222 Maple St, Worcester, MA', '5550987654', 'Zachary.Lopez@email.com', 'P@ss2109');
 exec insertAdmin('Ava', 'Hernandez', '987-11-2345', '2323 Oak St, Boston, MA', '5559876543', 'Ava.Hernandez@email.com', 'P@ss0987');
 exec insertAdmin('Benjamin', 'Adams', '987-21-3456', '2424 Pine St, Cambridge, MA', '5558765432', 'Benjamin.Adams@email.com', 'P@ss7654');
 exec insertAdmin('Chloe', 'Ramirez', '987-31-4567', '2525 Elm St, Lowell, MA', '5557654321', 'Chloe.Ramirez@email.com', 'P@ss4321');
