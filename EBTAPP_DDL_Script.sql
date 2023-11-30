@@ -70,6 +70,10 @@ BEGIN
             SELECT 'ADMIN' FROM DUAL
 			UNION ALL
 			SELECT 'ADMIN_SEQ' FROM DUAL
+            UNION ALL
+			SELECT 'ACCOUNT_NUMBER_SEQ' FROM DUAL
+            UNION ALL
+			SELECT 'EBTCARD_NUMBER_SEQ' FROM DUAL
         )
         SELECT I.OBJ_NAME, O.OBJECT_TYPE
         FROM INVT_OBJ I 
@@ -102,6 +106,7 @@ CREATE TABLE admin (
 ALTER TABLE admin ADD CONSTRAINT admin_pk PRIMARY KEY ( adminid );
 
 CREATE SEQUENCE ebtaccount_seq;
+create sequence account_number_seq;
 CREATE TABLE ebtaccount (
     accountid                    NUMBER,
     accountnumber                VARCHAR2(200) UNIQUE NOT NULL,
@@ -128,17 +133,20 @@ CREATE TABLE ebtapplication (
     benefitprogramname VARCHAR2(100),
     status             VARCHAR2(50) DEFAULT 'PENDING' CHECK (UPPER(status) IN ('PENDING', 'APPROVED', 'REJECTED')),
     users_userid       NUMBER NOT NULL,
-    admin_adminid     NUMBER NOT NULL
+    admin_adminid     NUMBER NOT NULL,
+    created_at DATE DEFAULT SYSDATE NOT NULL,
+    updated_at DATE DEFAULT SYSDATE
 );
 
 ALTER TABLE ebtapplication ADD CONSTRAINT ebtapplication_pk PRIMARY KEY ( applicationid );
 
 CREATE SEQUENCE ebtcard_seq;
+create sequence ebtcard_number_seq;
 CREATE TABLE ebtcard (
     cardid               NUMBER,
-    cardnumber           VARCHAR2(16) NOT NULL,
+    cardnumber           VARCHAR2(16) UNIQUE NOT NULL,
     activationdate       DATE NOT NULL,
-    statusofcard         VARCHAR2(20) NOT NULL,
+    statusofcard         VARCHAR2(20)  DEFAULT 'PENDING' CHECK (UPPER(statusofcard) IN ('ACTIVE', 'INACTIVE', 'PENDING','BLOCKED')) NOT NULL,
     pin                  NUMBER(4),
     expirydate           DATE NOT NULL,
     ebtaccount_accountid NUMBER NOT NULL
@@ -174,8 +182,8 @@ CREATE TABLE merchant (
     type          VARCHAR2(50) NOT NULL,
     name          VARCHAR2(50) NOT NULL,
     address       VARCHAR2(100),
-    accountnumber VARCHAR2(200) UNIQUE NOT NULL,
-    routingnumber VARCHAR2(100) NOT NULL,
+    accountnumber VARCHAR2(200) UNIQUE,
+    routingnumber VARCHAR2(100),
     archive       CHAR(1)
 );
 
@@ -195,7 +203,7 @@ CREATE SEQUENCE transactions_seq;
 CREATE TABLE transactions (
     transactionid       NUMBER,
     amount              NUMBER(20, 2) NOT NULL,
-    status              VARCHAR2(20) NOT NULL,
+    status              VARCHAR2(20) DEFAULT 'PENDING' CHECK (UPPER(status) IN ('PENDING', 'SUCCESS', 'FAILURE','REFUNDED')) NOT NULL,
     recorded_date       DATE NOT NULL,
     merchant_merchantid NUMBER NOT NULL,
     ebtcard_cardid      NUMBER NOT NULL
@@ -252,3 +260,45 @@ ALTER TABLE transactions
 ALTER TABLE transactions
     ADD CONSTRAINT transactions_merchant_fk FOREIGN KEY ( merchant_merchantid )
         REFERENCES merchant ( merchantid );
+        
+
+--Creating views for all the tables
+CREATE OR REPLACE VIEW VIEW_ADMIN
+AS
+SELECT * FROM ADMIN;
+
+CREATE OR REPLACE VIEW VIEW_EBTACCOUNT
+AS
+SELECT * FROM EBTACCOUNT;
+
+CREATE OR REPLACE VIEW VIEW_EBTCARD
+AS
+SELECT * FROM EBTCARD;
+
+CREATE OR REPLACE VIEW VIEW_EBTSCHEDULE
+AS
+SELECT * FROM EBTSCHEDULE;
+
+CREATE OR REPLACE VIEW VIEW_ITEM
+AS
+SELECT * FROM ITEM;
+
+CREATE OR REPLACE VIEW VIEW_EBTAPPLICATION
+AS
+SELECT * FROM EBTAPPLICATION;
+
+CREATE OR REPLACE VIEW VIEW_MERCHANT
+AS
+SELECT * FROM MERCHANT;
+
+CREATE OR REPLACE VIEW VIEW_USERS
+AS
+SELECT * FROM USERS;
+
+CREATE OR REPLACE VIEW VIEW_TRANSACTIONITEMLIST
+AS
+SELECT * FROM TRANSACTIONITEMLIST;
+
+CREATE OR REPLACE VIEW VIEW_TRANSACTIONS
+AS
+SELECT * FROM TRANSACTIONS;
