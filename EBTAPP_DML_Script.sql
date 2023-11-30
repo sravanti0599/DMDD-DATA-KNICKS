@@ -365,7 +365,6 @@ BEGIN
         cardid,
         cardnumber,
         activationdate,
-        statusofcard,
         expirydate,
         ebtaccount_accountid
     )
@@ -373,7 +372,6 @@ BEGIN
         ebtcard_seq.nextval,
         v_cardnumber,
         SYSDATE, -- Use the current date as the activation date
-        'PENDING', -- Default status to 'PENDING' , will be ACTIVE once the pin is set
         ADD_MONTHS(SYSDATE, 24), -- Expiry date is 2 years from now
         p_ebtaccount_accountid
     );
