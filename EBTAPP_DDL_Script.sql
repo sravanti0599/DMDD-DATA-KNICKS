@@ -218,6 +218,7 @@ CREATE TABLE users (
     lastname  VARCHAR2(50) NOT NULL,
     ssn       VARCHAR2(11) UNIQUE NOT NULL,
     address   VARCHAR2(100) NOT NULL,
+    dob       DATE NOT NULL,
     phone     VARCHAR2(20),
     email     VARCHAR2(255),
     password  VARCHAR2(255)

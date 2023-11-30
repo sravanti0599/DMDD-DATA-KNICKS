@@ -126,6 +126,7 @@ CREATE OR REPLACE PROCEDURE insertUser (
     p_address users.address%type,
     p_phone users.phone%type,
     p_email users.email%type,
+    p_dob  VARCHAR,
     p_password users.password%type
 )
 AS
@@ -173,6 +174,7 @@ BEGIN
         address,
         phone,
         email,
+        dob,
         password
     )
     VALUES (
@@ -183,6 +185,7 @@ BEGIN
         p_address,
         p_phone,
         p_email,
+        TO_DATE(p_dob, 'DD-MM-YYY'),
         p_password
     );
 
