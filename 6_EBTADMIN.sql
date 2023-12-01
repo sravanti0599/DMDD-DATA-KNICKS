@@ -410,7 +410,3 @@ exec UpdateNextDisbursementDate('EBT Program MA');
 select * from ebtapplication;
 select * from ebtcard;
 select * from ebtaccount;
-
-
-
-
