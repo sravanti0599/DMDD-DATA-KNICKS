@@ -67,15 +67,15 @@ END;
 
 -- Stored Procedure to adminLogin
 CREATE OR REPLACE PROCEDURE adminLogin (
-    p_adminid admins.adminid%type,
-    p_password admins.password%type
+    p_adminid admin.adminid%type,
+    p_password admin.password%type
 )
 AS
-    v_stored_password admins.password%type;
+    v_stored_password admin.password%type;
 BEGIN
     -- Retrieve the stored password for the given adminid
     SELECT password INTO v_stored_password
-    FROM admins
+    FROM admin
     WHERE adminid = p_adminid;
 
     -- Check if the retrieved password matches the provided password
@@ -94,8 +94,8 @@ END;
 
 -- Stored Procedure to reset Admin Password
 CREATE OR REPLACE PROCEDURE resetAdminPassword (
-    p_adminid admins.adminid%type,
-    p_new_password admins.password%type
+    p_adminid admin.adminid%type,
+    p_new_password admin.password%type
 )
 AS
     -- Custom exception for weak password
@@ -109,7 +109,7 @@ BEGIN
     END IF;
 
     -- Update the password for the given adminid
-    UPDATE admins
+    UPDATE admin
     SET password = p_new_password
     WHERE adminid = p_adminid;
 
@@ -128,11 +128,11 @@ END;
 
 --- Stored Procedure to update admin details
 CREATE OR REPLACE PROCEDURE updateAdminDetails (
-    p_adminid admins.adminid%type,
-    p_firstname admins.firstname%type,
-    p_lastname admins.lastname%type,
-    p_email admins.email%type,
-    p_phone admins.phone%type
+    p_adminid admin.adminid%type,
+    p_firstname admin.firstname%type,
+    p_lastname admin.lastname%type,
+    p_email admin.email%type,
+    p_phone admin.phone%type
 )
 AS
     -- Custom exceptions
@@ -153,7 +153,7 @@ BEGIN
     END IF;
 
     -- Update admin details
-    UPDATE admins
+    UPDATE admin
     SET 
         firstname = p_firstname,
         lastname = p_lastname,
