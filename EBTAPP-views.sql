@@ -117,3 +117,16 @@ GROUP BY
  select * from pending_ebt_applications_view;
  select * from monthly_application_counts;
  select * from age_view;
+ 
+CREATE VIEW card_status_counts AS
+SELECT
+    COUNT(CASE WHEN statusofcard = 'LOST' THEN 1 END) AS lost_count,
+    COUNT(CASE WHEN statusofcard = 'INACTIVE' THEN 1 END) AS inactive_count,
+    COUNT(CASE WHEN statusofcard = 'ACTIVE' THEN 1 END) AS active_count,
+    COUNT(CASE WHEN statusofcard = 'PENDING' THEN 1 END) AS pending_count,
+    COUNT(CASE WHEN statusofcard = 'BLOCKED' THEN 1 END) AS blocked_count
+FROM
+    ebtcard;
+    
+SELECT * FROM card_status_counts;
+

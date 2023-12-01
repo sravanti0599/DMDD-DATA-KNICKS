@@ -679,7 +679,7 @@ SELECT *
 FROM ebtcard
 WHERE statusofcard = 'ACTIVE';
 
-SELECT * FROM ActiveEBTAccounts;
+
 
 ---------------------------------------------------------
 

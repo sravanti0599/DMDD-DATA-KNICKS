@@ -112,6 +112,7 @@ CREATE TABLE ebtaccount (
     accountnumber                VARCHAR2(200) UNIQUE NOT NULL,
     foodbalance                  NUMBER(20, 2) NOT NULL,
     cashbalance                  NUMBER(20, 2) NOT NULL,
+    status                       VARCHAR2(50) DEFAULT 'ACTIVE' CHECK (UPPER(status) IN ('ACTIVE','INACTIVE')),  
     ebtapplication_applicationid NUMBER NOT NULL,
     ebtschedule_scheduleid       NUMBER NOT NULL
 );
