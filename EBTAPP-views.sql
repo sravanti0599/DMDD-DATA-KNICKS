@@ -39,14 +39,18 @@ WHERE
     e.status = 'Pending' or e.status = 'PENDING';
 
 
+--last_month_summary_view
+CREATE OR REPLACE VIEW monthly_application_counts AS
+SELECT
+    TO_CHAR(created_at, 'YYYY-MM') AS month,
+    COUNT(*) AS created_count,
+    SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) AS REJECTED_APPLICATIONS,
+    SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) AS APPROVED_APPLICATIONS
 
--- select * from view_transactionitemlist;
--- SELECT * FROM view_transactions;
--- select * from view_ebtapplication;
--- select * from pending_ebt_applications_view;
--- SELECT * FROM view_ebtcard;
--- select * from users;
--- select * from view_ebtaccount;
+FROM
+    EBTAPPLICATION
+GROUP BY
+    TO_CHAR(created_at, 'YYYY-MM');
 
 --transaction_summary_view
 CREATE or replace VIEW transaction_summary_view AS
@@ -75,7 +79,41 @@ JOIN
     view_ebtapplication eap on eap.applicationid = ec.ebtaccount_accountid
 JOIN 
     view_users u on u.userid = eap.users_userid;
+    
+    
+    
+--Analysis
+CREATE OR REPLACE VIEW age_view AS
+WITH age_categories AS (
+    SELECT
+        u.userid,
+        CASE
+            WHEN EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM u.dob) < 5 THEN 'Younger than 5 years'
+            WHEN EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM u.dob) BETWEEN 5 AND 17 THEN '5 through 17'
+            WHEN EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM u.dob) BETWEEN 18 AND 35 THEN '18 through 35'
+            WHEN EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM u.dob) BETWEEN 36 AND 59 THEN '36 through 59'
+            ELSE 'Elderly (60 or More)'
+        END AS age_category
+    FROM
+        users u
+)
+SELECT
+    ac.age_category,
+    COUNT(*) AS total_applications,
+    COUNT(CASE WHEN e.status = 'APPROVED' THEN 1 END) AS total_approved,
+    COUNT(CASE WHEN e.status = 'REJECTED' THEN 1 END) AS total_rejected,
+    COUNT(CASE WHEN e.status IN ('APPROVED', 'REJECTED') THEN 1 END) AS total_success,
+    (COUNT(*) / (SELECT COUNT(*) FROM ebtapplication) * 100) AS percentage_total,
+    (COUNT(CASE WHEN e.status = 'APPROVED' THEN 1 END) / COUNT(*) * 100) AS percentage_approved,
+    (COUNT(CASE WHEN e.status = 'REJECTED' THEN 1 END) / COUNT(*) * 100) AS percentage_rejected
+FROM
+    age_categories ac
+    JOIN ebtapplication e ON ac.userid = e.users_userid
+GROUP BY
+    ac.age_category;
 
  select * from transaction_summary_view;
  select * from ebtaccount_balance_view;
  select * from pending_ebt_applications_view;
+ select * from monthly_application_counts;
+ select * from age_view;
