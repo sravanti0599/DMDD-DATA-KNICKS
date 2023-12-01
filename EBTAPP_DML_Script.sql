@@ -70,29 +70,22 @@ AS
     InvalidPhone EXCEPTION;
 
 BEGIN
-    -- Validate email format
     IF email IS NULL OR NOT REGEXP_LIKE(email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$') THEN
         RAISE InvalidEmail;
     END IF;
 
-    -- Validate SSN format (assuming SSN is in the format 'XXX-XX-XXXX')
     IF NOT REGEXP_LIKE(ssn, '^\d{3}-\d{2}-\d{4}$') THEN
         RAISE InvalidSSN;
     END IF;
 
-    -- Validate phone number format (assuming US phone number format '(')
     IF NOT REGEXP_LIKE(phone, '^\d{10}$') THEN
-        -- Raise InvalidPhone exception
         RAISE InvalidPhone;
     END IF;
 
-    -- Validate password complexity
     IF NOT REGEXP_LIKE(password, '^[a-zA-Z][a-zA-Z0-9@$!%*?&]{7,}$') THEN
-        -- Raise WeakPassword exception
         RAISE WeakPassword;
     END IF;
 
-    -- If all validations pass, proceed with the insertion
     SELECT admin_seq.nextval INTO v_adminid FROM dual;
 
     INSERT INTO admin (adminid, firstname, lastname, ssn, address, phone, email, password)
@@ -132,38 +125,28 @@ CREATE OR REPLACE PROCEDURE insertUser (
 AS
     v_userid NUMBER;
 
-    -- Custom exceptions
     InvalidEmail EXCEPTION;
     InvalidSSN EXCEPTION;
     WeakPassword EXCEPTION;
     InvalidPhone EXCEPTION;
 
 BEGIN
-    -- Validate email format
     IF p_email IS NULL OR NOT REGEXP_LIKE(p_email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$') THEN
-        -- Raise InvalidEmail exception
         RAISE InvalidEmail;
     END IF;
 
-    -- Validate SSN format (assuming SSN is in the format 'XXX-XX-XXXX')
     IF NOT REGEXP_LIKE(p_ssn, '^\d{3}-\d{2}-\d{4}$') THEN
-        -- Raise InvalidSSN exception
         RAISE InvalidSSN;
     END IF;
 
-    -- Validate phone number format (assuming 9-digit string format)
     IF NOT REGEXP_LIKE(p_phone, '^\d{10}$') THEN
-        -- Raise InvalidPhone exception
         RAISE InvalidPhone;
     END IF;
 
-    -- Validate password complexity
     IF NOT REGEXP_LIKE(p_password, '^[a-zA-Z][a-zA-Z0-9@$!%*?&]{7,}$') THEN
-        -- Raise WeakPassword exception
         RAISE WeakPassword;
     END IF;
 
-    -- If all validations pass, proceed with the insertion
     SELECT users_seq.nextval INTO v_userid FROM dual;
 
     INSERT INTO users (
@@ -185,7 +168,7 @@ BEGIN
         p_address,
         p_phone,
         p_email,
-        TO_DATE(p_dob, 'DD-MM-YYY'),
+        TO_DATE(p_dob, 'DD-MM-YYYY'),
         p_password
     );
 
@@ -227,7 +210,6 @@ BEGIN
     FROM EBTAPPLICATION
     WHERE users_userid = p_users_userid AND status = 'PENDING';
 
-    -- Raise custom exception if there is an existing record with 'Pending' status
     IF v_pending_count > 0 THEN
         RAISE PendingApplicationExists;
     END IF;
@@ -265,7 +247,6 @@ EXCEPTION
     WHEN PendingApplicationExists THEN
         DBMS_OUTPUT.PUT_LINE('Error: An existing record with Pending status already exists for the user.');
     WHEN OTHERS THEN
-        -- Raise custom exception for other errors
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
 END;
 /
@@ -279,12 +260,10 @@ CREATE OR REPLACE PROCEDURE updateEBTApplicationStatus (
 AS
     v_admin_id ADMIN.adminid%TYPE;
 BEGIN
-    -- Update the status of the application
     UPDATE EBTAPPLICATION
     SET status = p_status, updated_at=SYSDATE
     WHERE applicationid = p_applicationid;
 
-    -- Retrieve the admin id for logging or further processing
     SELECT adminid
     INTO v_admin_id
     FROM ADMIN
@@ -293,7 +272,6 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('EBT Application ' || p_status || ' successfully by ' || v_admin_id);
 EXCEPTION
     WHEN OTHERS THEN
-        -- Raise custom exception for other errors
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
 END;
 /
@@ -347,18 +325,15 @@ AS
     v_cardnumber ebtcard.cardnumber%TYPE;
     v_existing_count NUMBER;
 
-    -- Custom Exceptions
     UserHasActiveCard EXCEPTION;
 BEGIN
 
-    -- Check if the user already has an active card
     SELECT COUNT(*)
     INTO v_existing_count
     FROM ebtcard
     WHERE ebtaccount_accountid = p_ebtaccount_accountid
       AND statusofcard = 'ACTIVE';
 
-    -- Raise exception if the user already has an active card
     IF v_existing_count > 0 THEN
         RAISE UserHasActiveCard;
     END IF;
