@@ -1,3 +1,5 @@
+SET SERVEROUTPUT ON
+
 --Add to Item table
 exec AddOrUpdateItem('Apple', '876543210987', 10.50, 'fruits', 'Y');
 exec AddOrUpdateItem('Banana', '765432109876', 8.99, 'fruits', 'Y');
@@ -18,8 +20,7 @@ select * from item;
 --Updates in Item table if name exists
 exec AddOrUpdateItem('PEACH', '0293875178835', 5.99, 'stone fruit', 'Y');
 
-select * from item;
-SET SERVEROUTPUT ON
+--adds to merchant table if merchant name is not present
 exec AddOrUpdateMerchant('Store', 'Walmart', '5 Greent St Boston MA', '00828839973267849', '00000PNC6899368','N');
 exec AddOrUpdateMerchant('ATM', 'PNC Bank', '123 Delicious Ave', '98765432101234567', '00000BOA1234567','N');
 exec AddOrUpdateMerchant('Store', 'Fresh Express', '789 Trendy St', '1111222233334444', '00000CHASE5555555','N');
@@ -31,7 +32,21 @@ exec AddOrUpdateMerchant('Store', 'EatFit', '888 Workout Way', '7777666655554444
 exec AddOrUpdateMerchant('Store', 'Paws and Claws', '333 Pet Avenue', '1212121212121212', '00000DISC3456789','Y');
 exec AddOrUpdateMerchant('Store', 'Style Haven', '456 Decor Street', '9090909090909090', '00000VISA8765432','Y');
 
-select * from merchant;
+--updates merchant if merchant name is already present
 exec AddOrUpdateMerchant('Store', 'WALMART', '5 Greent St', '00828839973267849', '00000PNC6899368','N');
 
-select * from ebtcard;
+-- SUCCESS transaction at Store
+exec InitiateTransactionAtStore(4,5,4,2);
+exec InitiateTransactionAtStore(8,3,5,3);
+exec InitiateTransactionAtStore(5,7,10,5);
+
+--FAILURE transaction at Store
+exec InitiateTransactionAtStore(3,3,5,3); 
+exec InitiateTransactionAtStore(5,6,10,5);
+
+--SUCCESS transaction at ATM (MerchantID - 2 and 6 are ATMs)
+exec InitiateTransactionAtATM(4,2,10);
+exec InitiateTransactionAtATM(8,6,5);
+
+--FAILURE transaction at ATM
+exec InitiateTransactionAtATM(4,3,10);

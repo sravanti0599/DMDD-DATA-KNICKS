@@ -79,6 +79,7 @@ BEGIN
 	-- check if price is valid
 	IF pi_Price <= 0 THEN
 		RAISE e_invalid_price;
+    END IF;
     -- Check if the item already exists
     itemExists := CheckItemExistence(pi_Name);
 
@@ -192,6 +193,7 @@ CREATE OR REPLACE FUNCTION CheckStoreTransactionEligibility(
 RETURN NUMBER
 AS
     isEligible NUMBER;
+    v_expiry_dt DATE;
 BEGIN
     -- Check if the EBT card is active
     SELECT CASE
@@ -201,14 +203,25 @@ BEGIN
     FROM EBTCard
     WHERE CardID = pi_CardID;
 
+    -- To extract expiry date of the card
+	SELECT ExpiryDate INTO v_expiry_dt
+	FROM EBTCard 
+	WHERE CardID = pi_CardID;
+	
+	-- updating card status as inactive if expiry date is expired
+	IF v_expiry_dt < SYSDATE THEN
+		UPDATE EBTCard 
+		SET StatusOfCard = 'INACTIVE'
+		WHERE CardID = pi_CardID;
+        COMMIT;
+    END IF;
     -- Check if the merchant is eligible
     IF isEligible = 1 THEN
         SELECT CASE
-            WHEN Archive = 'N' THEN 1 ELSE 0
+            WHEN Archive = 'N' AND Type='Store' THEN 1 ELSE 0
         END INTO isEligible
         FROM Merchant
-        WHERE MerchantID = pi_MerchantID
-        AND Type = 'Store';
+        WHERE MerchantID = pi_MerchantID;
     END IF;
 
     -- Check if the item is eligible 
@@ -252,19 +265,19 @@ BEGIN
 	WHERE CardID = pi_CardID;
 	
 	-- updating card status as inactive if expiry date is expired
-	IF v_expiry_dt > SYSDATE THEN
+	IF v_expiry_dt < SYSDATE THEN
 		UPDATE EBTCard 
 		SET StatusOfCard = 'INACTIVE'
 		WHERE CardID = pi_CardID;
-
+    END IF;
+    
     -- Check if the merchant is eligible
     IF isEligible = 1 THEN
         SELECT CASE
-            WHEN Archive = 'N' THEN 1 ELSE 0
+            WHEN Archive = 'N' AND Type = 'ATM' THEN 1 ELSE 0
         END INTO isEligible
         FROM Merchant
-        WHERE MerchantID = pi_MerchantID
-        AND Type = 'ATM';
+        WHERE MerchantID = pi_MerchantID;
     END IF;
 
     RETURN isEligible;
@@ -316,7 +329,7 @@ BEGIN
         IF v_foodBalance_check = 1 THEN
             -- Insert transaction record
             INSERT INTO Transactions (TransactionID, Amount, Status, Recorded_Date, Merchant_MerchantID, EBTCard_CardID)
-            VALUES (TRANSACTIONS_SEQ.nextval, v_amount, 'Approved', SYSDATE, pi_MerchantID, pi_CardID)
+            VALUES (TRANSACTIONS_SEQ.nextval, v_amount, 'SUCCESS', SYSDATE, pi_MerchantID, pi_CardID)
             RETURNING TransactionID INTO v_TransactionID;
             
             -- Record transaction item list
@@ -337,7 +350,7 @@ BEGIN
     ELSE
         -- Handle ineligible transaction
         INSERT INTO Transactions (TransactionID, Amount, Status, Recorded_Date, Merchant_MerchantID, EBTCard_CardID)
-        VALUES (TRANSACTIONS_SEQ.nextval, v_amount, 'Rejected', SYSDATE, pi_MerchantID, pi_CardID);
+        VALUES (TRANSACTIONS_SEQ.nextval, v_amount, 'FAILURE', SYSDATE, pi_MerchantID, pi_CardID);
         DBMS_OUTPUT.PUT_LINE('Transaction is not eligible.');
         COMMIT;
     END IF;
@@ -382,7 +395,7 @@ BEGIN
             
             -- Insert transaction record
             INSERT INTO Transactions (TransactionID, Amount, Status, Recorded_Date, Merchant_MerchantID, EBTCard_CardID)
-            VALUES (TRANSACTIONS_SEQ.nextval, pi_Amount, 'Approved', SYSDATE, pi_MerchantID, pi_CardID);
+            VALUES (TRANSACTIONS_SEQ.nextval, pi_Amount, 'SUCCESS', SYSDATE, pi_MerchantID, pi_CardID);
                 
             -- Update EBT account balance
             UPDATE EBTAccount
@@ -398,7 +411,7 @@ BEGIN
     ELSE
          -- Handle ineligible transaction
         INSERT INTO Transactions (TransactionID, Amount, Status, Recorded_Date, Merchant_MerchantID, EBTCard_CardID)
-        VALUES (TRANSACTIONS_SEQ.nextval, pi_Amount, 'Rejected', SYSDATE, pi_MerchantID, pi_CardID);
+        VALUES (TRANSACTIONS_SEQ.nextval, pi_Amount, 'FAILURE', SYSDATE, pi_MerchantID, pi_CardID);
         DBMS_OUTPUT.PUT_LINE('Transaction is not eligible.');
         COMMIT;
     END IF;
