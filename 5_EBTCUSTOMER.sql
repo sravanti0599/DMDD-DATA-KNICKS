@@ -901,6 +901,9 @@ EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_t
 EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'),399);
 EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'),400);
 
+--Same user cannot have more than one pending application
+EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_to_raw('proof of immigration'), utl_raw.cast_to_raw('proof of residence'), utl_raw.cast_to_raw('proof of identity'),400);
+
 
 
 select * from users;

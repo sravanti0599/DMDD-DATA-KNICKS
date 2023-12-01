@@ -330,8 +330,11 @@ CREATE OR REPLACE PROCEDURE createEBTApplication (
 )
 AS
     v_pending_count NUMBER;
+    v_active_account NUMBER;
     v_random_admin_id EBTAPPLICATION.admin_adminid%TYPE;
     PendingApplicationExists EXCEPTION;
+    ActiveApplicationExists EXCEPTION;
+
 BEGIN
 
     --TODO: DECIDE TO CHECK PENDING AS WELL AS SUCCESS SCENARIOS.
@@ -339,9 +342,23 @@ BEGIN
     INTO v_pending_count
     FROM EBTAPPLICATION
     WHERE users_userid = p_users_userid AND status = 'PENDING';
-
+    
     IF v_pending_count > 0 THEN
         RAISE PendingApplicationExists;
+    END IF;
+
+    
+    SELECT COUNT(*)
+    INTO v_active_account
+    FROM EBTAPPLICATION A
+    JOIN EBTACCOUNT AC ON A.APPLICATIONID = AC.ebtapplication_applicationid
+    WHERE A.users_userid = p_users_userid
+    AND A.status = 'APPROVED'
+    AND AC.status = 'ACTIVE';
+
+
+    IF v_active_account > 0 THEN
+        RAISE ActiveApplicationExists;
     END IF;
 
     v_random_admin_id := getAdminIdforAssignment;
@@ -376,6 +393,8 @@ BEGIN
 EXCEPTION
     WHEN PendingApplicationExists THEN
         DBMS_OUTPUT.PUT_LINE('Error: An existing record with Pending status already exists for the user.');
+    WHEN ActiveApplicationExists THEN
+        DBMS_OUTPUT.PUT_LINE('Error: An existing Account already exists.');
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
 END;
@@ -389,18 +408,32 @@ CREATE OR REPLACE PROCEDURE updateEBTApplicationStatus (
 )
 AS
     v_admin_id ADMIN.adminid%TYPE;
+    v_current_status EBTAPPLICATION.status%TYPE;
+    ApplicationAlreadyApproved EXCEPTION;
+
 BEGIN
+
+
+    SELECT admin_adminid, status  
+    INTO v_admin_id, v_current_status
+    FROM EBTAPPLICATION WHERE
+    applicationid = p_applicationid;
+    
+    
+    IF v_current_status = 'APPROVED' THEN
+        RAISE ApplicationAlreadyApproved;
+    END IF;
+  
     UPDATE EBTAPPLICATION
     SET status = p_status, updated_at=SYSDATE
     WHERE applicationid = p_applicationid;
 
-    SELECT adminid
-    INTO v_admin_id
-    FROM ADMIN
-    WHERE adminid = (SELECT admin_adminid FROM EBTAPPLICATION WHERE applicationid = p_applicationid);
     COMMIT;
     DBMS_OUTPUT.PUT_LINE('EBT Application ' || p_status || ' successfully by ' || v_admin_id);
 EXCEPTION
+    WHEN ApplicationAlreadyApproved THEN
+        DBMS_OUTPUT.PUT_LINE('Error: An appication has already been approved. Once approved cannot be reverted');
+
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
 END;
