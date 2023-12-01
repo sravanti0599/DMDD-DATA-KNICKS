@@ -422,3 +422,242 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error in the INSERT: ' || SQLERRM);
 END;
 /
+
+------procedure for blocking or unblocking card
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE PROCEDURE BlockOrUnblockCard(
+    p_cardNumber VARCHAR2,
+    p_blockStatus VARCHAR2
+)
+AS
+BEGIN
+    
+    IF p_blockStatus IN ('ACTIVE', 'INACTIVE', 'PENDING', 'BLOCKED','LOST') THEN
+       
+        UPDATE ebtcard
+        SET statusofcard = p_blockStatus,
+            pin = null
+        WHERE cardnumber = p_cardNumber;
+
+        
+        COMMIT;
+
+        DBMS_OUTPUT.PUT_LINE('Card status updated successfully');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid status value provided');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Card with number ' || p_cardNumber || ' not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in the UPDATE: ' || SQLERRM);
+END;
+/
+
+
+
+----------------create pin-------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE CreateAndUpdatePin(
+    p_cardNumber VARCHAR2,
+    p_newPin NUMBER
+)
+AS
+    p_statusofcard VARCHAR2(20);
+BEGIN
+    
+    IF p_newPin IS NOT NULL THEN
+       
+        SELECT statusofcard INTO p_statusofcard FROM ebtcard WHERE cardnumber = p_cardNumber;
+        UPDATE ebtcard
+        SET pin = p_newPin,
+            statusofcard = 'ACTIVE' 
+        WHERE cardnumber = p_cardNumber AND statusofcard != 'BLOCKED';
+        
+        
+        COMMIT;
+
+        DBMS_OUTPUT.PUT_LINE('PIN created and updated successfully');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid new PIN provided');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Card with number ' || p_cardNumber || ' not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in the UPDATE: ' || SQLERRM);
+END;
+/
+
+-----------reset pin------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE ResetAndSetPin(
+    p_cardNumber VARCHAR2,
+    p_newPin NUMBER
+)
+AS
+    old_pin NUMBER;
+    p_statusofcard VARCHAR(20);
+    oldPinError EXCEPTION;
+    blockedCardError EXCEPTION;
+BEGIN
+    
+    IF p_newPin IS NOT NULL THEN
+        
+        SELECT statusofcard INTO p_statusofcard FROM ebtcard WHERE cardnumber = p_cardNumber;
+        SELECT pin INTO old_pin FROM ebtcard WHERE cardnumber = p_cardNumber;
+        UPDATE ebtcard
+        SET pin = p_newPin,
+            statusofcard = 'ACTIVE' 
+        WHERE cardnumber = p_cardNumber AND statusofcard != 'BLOCKED';
+        IF p_statusofcard = 'BLOCKED' THEN 
+            RAISE blockedCardError;
+        END IF;
+        IF old_pin = p_newPin THEN
+            RAISE oldPinError;
+        END IF;
+        
+        COMMIT;
+
+        DBMS_OUTPUT.PUT_LINE('PIN reset and updated successfully');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid new PIN provided');
+    END IF;
+EXCEPTION
+    WHEN oldPinError THEN
+        DBMS_OUTPUT.PUT_LINE('Pin already used ');
+    WHEN blockedCardError THEN
+        DBMS_OUTPUT.PUT_LINE('Card already blocked ');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Card with number ' || p_cardNumber || ' not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in the UPDATE: ' || SQLERRM);
+END;
+/
+
+
+------------------lost card----------------------------------------
+
+CREATE OR REPLACE PROCEDURE LostCardAndDisable(
+    p_cardNumber VARCHAR2
+)
+AS
+    p_statusofcard VARCHAR(20);
+BEGIN
+    
+    SELECT statusofcard INTO p_statusofcard FROM ebtcard WHERE cardnumber = p_cardNumber;
+    UPDATE ebtcard
+    SET statusofcard = 'LOST',
+        activationdate = SYSDATE, 
+        expirydate = SYSDATE, 
+        pin = NULL
+    WHERE cardnumber = p_cardNumber;
+
+    
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Card ' || p_cardNumber || ' marked as lost, disabled, and archived successfully');
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Card with number ' || p_cardNumber || ' not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in the UPDATE: ' || SQLERRM);
+END;
+/
+
+
+
+-----------------updating food and card amount-----
+
+CREATE OR REPLACE PROCEDURE UpdateNextDisbursementDate(
+    p_benefitprogramname VARCHAR2
+)
+AS
+    
+BEGIN
+    UPDATE ebtschedule
+    SET nextdisbursementdate =
+        CASE
+            WHEN disbursementfrequency = 'Monthly' THEN ADD_MONTHS(TRUNC(SYSDATE), 1)
+            WHEN disbursementfrequency = 'Quarterly' THEN ADD_MONTHS(TRUNC(SYSDATE), 3)
+            WHEN disbursementfrequency = 'Yearly' THEN ADD_MONTHS(TRUNC(SYSDATE), 12)
+            
+            
+        END
+    WHERE benefitprogramname = p_benefitprogramname;
+    
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Next disbursement date updated successfully for ' || p_benefitprogramname);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Benefit program ' || p_benefitprogramname || ' not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in the UPDATE: ' || SQLERRM);
+END;
+/
+----------------------status of account-----
+CREATE OR REPLACE PROCEDURE MarkAccountAndCardInactive(
+    p_accountNumber VARCHAR2
+)
+AS
+    p_accountid EBTACCOUNT.ACCOUNTID%TYPE;
+BEGIN
+    
+    UPDATE ebtaccount
+    SET status = 'INACTIVE'
+    WHERE accountnumber = p_accountNumber AND status = 'ACTIVE';
+    SELECT accountid INTO p_accountid FROM ebtaccount WHERE accountnumber = p_accountNumber;
+
+    
+    UPDATE ebtcard
+    SET statusofcard = 'INACTIVE'
+    WHERE ebtaccount_accountid = p_accountid;
+
+   
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Account and associated card marked as inactive successfully' || p_accountid);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Account with number ' || p_accountNumber || ' not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error in the UPDATE: ' || SQLERRM);
+END;
+/
+
+
+
+
+
+CREATE OR REPLACE TRIGGER UpdateAccountsOnDisbursementDateUpdate
+AFTER UPDATE ON ebtschedule
+FOR EACH ROW
+DECLARE
+BEGIN
+    IF :OLD.nextdisbursementdate != :NEW.nextdisbursementdate THEN
+        
+        UPDATE ebtaccount
+        SET foodbalance = foodbalance + 300,
+            cashbalance = cashbalance + 200
+        WHERE ebtschedule_scheduleid = :NEW.scheduleid
+          AND status = 'ACTIVE';
+    END IF;
+END;
+/
+
+
+
+------------view to display active EBT accounts-----------
+
+CREATE OR REPLACE VIEW ActiveEBTAccounts AS
+SELECT *
+FROM ebtcard
+WHERE statusofcard = 'ACTIVE';
+
+
+
+---------------------------------------------------------
+
+
+
+
