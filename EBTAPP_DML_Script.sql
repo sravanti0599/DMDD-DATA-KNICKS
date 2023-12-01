@@ -588,7 +588,7 @@ END;
 
 
 ----------------create pin-------------------------------------------------------------------------------
-CREATE OR REPLACE PROCEDURE CreateAndUpdatePin(
+CREATE OR REPLACE PROCEDURE CreatePin(
     p_cardNumber VARCHAR2,
     p_newPin NUMBER
 )
@@ -620,7 +620,7 @@ END;
 /
 
 -----------reset pin------------------------------------------------------------------------------------
-CREATE OR REPLACE PROCEDURE ResetAndSetPin(
+CREATE OR REPLACE PROCEDURE ResetPin(
     p_cardNumber VARCHAR2,
     p_newPin NUMBER
 )
@@ -677,7 +677,6 @@ BEGIN
     SELECT statusofcard INTO p_statusofcard FROM ebtcard WHERE cardnumber = p_cardNumber;
     UPDATE ebtcard
     SET statusofcard = 'LOST',
-        activationdate = SYSDATE, 
         expirydate = SYSDATE, 
         pin = NULL
     WHERE cardnumber = p_cardNumber;

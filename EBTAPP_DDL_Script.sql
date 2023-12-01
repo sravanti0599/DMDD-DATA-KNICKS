@@ -147,7 +147,7 @@ CREATE TABLE ebtcard (
     cardid               NUMBER,
     cardnumber           VARCHAR2(16) UNIQUE NOT NULL,
     activationdate       DATE NOT NULL,
-    statusofcard         VARCHAR2(20)  DEFAULT 'PENDING' CHECK (UPPER(statusofcard) IN ('ACTIVE', 'INACTIVE', 'PENDING','BLOCKED')) NOT NULL,
+    statusofcard         VARCHAR2(20)  DEFAULT 'PENDING' CHECK (UPPER(statusofcard) IN ('ACTIVE', 'INACTIVE', 'PENDING','BLOCKED','LOST')) NOT NULL,
     pin                  NUMBER(4),
     expirydate           DATE NOT NULL,
     ebtaccount_accountid NUMBER NOT NULL
