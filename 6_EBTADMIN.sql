@@ -1,3 +1,5 @@
+ALTER SESSION SET CURRENT_SCHEMA = EBTADMIN;
+
 
 exec updateEBTApplicationStatus(1,'APPROVED');
 --Same application cannot be rejected, once approved -- below will show the exception handling.

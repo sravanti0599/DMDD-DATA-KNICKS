@@ -1,3 +1,5 @@
+ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+
 CREATE OR REPLACE PACKAGE user_management_pkg AS
     -- Procedure to validate user login
     PROCEDURE userLogin (

@@ -1,3 +1,5 @@
+ALTER SESSION SET CURRENT_SCHEMA = EBTUSER;
+
 exec insertUser('James', 'Butt', '448-70-3520', '6649 N Blue Gum St', '5048451427', 'jbutt@gmail.com', '15-11-1923', 'Dg2yquum');
 exec insertUser('Josephine', 'Darakjy', '290-08-6115', '4 B Blue Ridge Blvd', '8103749840', 'josephine_darakjy@darakjy.org', '24-07-1978', 'Wp1NrGyW');
 exec insertUser('Art', 'Venere', '304-30-3234', '8 W Cerritos Ave #54', '8562644130', 'art@venere.org', '14-04-2016', 'Rj1DV3Zx');

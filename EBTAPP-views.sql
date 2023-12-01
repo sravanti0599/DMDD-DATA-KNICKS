@@ -1,3 +1,5 @@
+ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+
 --ebtaccount_balance_view
 CREATE OR REPLACE VIEW ebtaccount_balance_view AS
 SELECT

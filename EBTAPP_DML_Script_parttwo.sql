@@ -1,3 +1,4 @@
+
 -- Insert into merchant table
 SET SERVEROUTPUT ON
 

@@ -1,4 +1,5 @@
 -- As part of phase four all the admin flows will be showcased here
+ALTER SESSION SET CURRENT_SCHEMA = EBTADMIN;
 
 EXEC  ADDEBTSchedule('30');
 

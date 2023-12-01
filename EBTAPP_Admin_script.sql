@@ -1,3 +1,4 @@
+ALTER SESSION SET CURRENT_SCHEMA = EBTADMIN;
 SET SERVEROUTPUT ON
 BEGIN
 	FOR I IN(
@@ -63,7 +64,16 @@ GRANT EXECUTE ON addEBTCard TO ebtadmin;
 GRANT EXECUTE ON addEBTSchedule TO ebtadmin;
 GRANT EXECUTE ON UpdateNextDisbursementDate TO ebtadmin;
 GRANT EXECUTE ON MarkAccountAndCardInactive TO ebtadmin;
-
+GRANT EXECUTE ON card_status_counts TO ebtadmin;
+GRANT EXECUTE ON age_view TO ebtadmin;
+GRANT EXECUTE ON monthly_application_counts to ebtadmin;
+GRANT EXECUTE ON pending_ebt_applications_view TO ebtadmin;
+GRANT EXECUTE ON ebtaccount_balance_view TO ebtuser,ebtadmin;
+GRANT EXECUTE ON transaction_summary_view TO ebtuser;
+GRANT EXECUTE ON ActiveEBTAccounts TO ebtadmin;
+GRANT EXECUTE ON CUST_FOOD_VS_CASH_VIEW TO ebtadmin;
+GRANT EXECUTE ON ITEM_QTY_VS_AMOUNT_VIEW TO EBTADMIN;
+GRANT EXECUTE ON COUNT_SUCCESS_FAIL_TRANSACTION_VIEW TO EBTADMIN;
 GRANT EXECUTE ON adminLogin TO ebtadmin;
 GRANT EXECUTE ON resetAdminPassword TO ebtadmin;
 GRANT EXECUTE ON updateAdminDetails TO ebtadmin;
