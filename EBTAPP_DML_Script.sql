@@ -109,6 +109,117 @@ EXCEPTION
 END;
 /
 
+-- Stored Procedure to adminLogin
+CREATE OR REPLACE PROCEDURE adminLogin (
+    p_adminid admin.adminid%type,
+    p_password admin.password%type
+)
+AS
+    v_stored_password admin.password%type;
+BEGIN
+    -- Retrieve the stored password for the given adminid
+    SELECT password INTO v_stored_password
+    FROM admin
+    WHERE adminid = p_adminid;
+
+    -- Check if the retrieved password matches the provided password
+    IF v_stored_password = p_password THEN
+        DBMS_OUTPUT.PUT_LINE('Login successful');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Error: Incorrect password');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Admin not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
+
+-- Stored Procedure to reset Admin Password
+CREATE OR REPLACE PROCEDURE resetAdminPassword (
+    p_adminid admin.adminid%type,
+    p_new_password admin.password%type
+)
+AS
+    -- Custom exception for weak password
+    WeakPassword EXCEPTION;
+
+BEGIN
+    -- Validate password complexity
+    IF NOT REGEXP_LIKE(p_new_password, '^[a-zA-Z][a-zA-Z0-9@$!%*?&]{7,}$') THEN
+        -- Raise WeakPassword exception
+        RAISE WeakPassword;
+    END IF;
+
+    -- Update the password for the given adminid
+    UPDATE admin
+    SET password = p_new_password
+    WHERE adminid = p_adminid;
+
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Password reset successful');
+EXCEPTION
+    WHEN WeakPassword THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Weak password');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Admin not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
+
+--- Stored Procedure to update admin details
+CREATE OR REPLACE PROCEDURE updateAdminDetails (
+    p_adminid admin.adminid%type,
+    p_firstname admin.firstname%type,
+    p_lastname admin.lastname%type,
+    p_email admin.email%type,
+    p_phone admin.phone%type
+)
+AS
+    -- Custom exceptions
+    InvalidEmail EXCEPTION;
+    InvalidPhone EXCEPTION;
+
+BEGIN
+    -- Validate email format
+    IF p_email IS NULL OR NOT REGEXP_LIKE(p_email, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$') THEN
+        -- Raise InvalidEmail exception
+        RAISE InvalidEmail;
+    END IF;
+
+    -- Validate phone number format (assuming 10-digit string format)
+    IF NOT REGEXP_LIKE(p_phone, '^\d{10}$') THEN
+        -- Raise InvalidPhone exception
+        RAISE InvalidPhone;
+    END IF;
+
+    -- Update admin details
+    UPDATE admin
+    SET 
+        firstname = p_firstname,
+        lastname = p_lastname,
+        email = p_email,
+        phone = p_phone
+    WHERE adminid = p_adminid;
+
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Admin details updated successfully');
+EXCEPTION
+    WHEN InvalidEmail THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid email format');
+    WHEN InvalidPhone THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid phone format');
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Admin not found');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+/
+
 
 -- Stored Proecdure to insert the User,  based on the buisness rules constraints have been added --
 
