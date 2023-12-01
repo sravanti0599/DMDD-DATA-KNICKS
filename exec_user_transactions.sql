@@ -39,6 +39,7 @@ exec AddOrUpdateMerchant('Store', 'WALMART', '5 Greent St', '00828839973267849',
 exec InitiateTransactionAtStore(4,5,4,2);
 exec InitiateTransactionAtStore(8,3,5,3);
 exec InitiateTransactionAtStore(5,7,10,5);
+exec InitiateTransactionAtStore(8,3,5,1);
 
 --FAILURE transaction at Store
 exec InitiateTransactionAtStore(3,3,5,3); 
@@ -47,6 +48,7 @@ exec InitiateTransactionAtStore(5,6,10,5);
 --SUCCESS transaction at ATM (MerchantID - 2 and 6 are ATMs)
 exec InitiateTransactionAtATM(4,2,10);
 exec InitiateTransactionAtATM(8,6,5);
+exec InitiateTransactionAtATM(8,6,195);
 
 --FAILURE transaction at ATM
 exec InitiateTransactionAtATM(4,3,10);

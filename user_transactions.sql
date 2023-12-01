@@ -434,17 +434,9 @@ AFTER UPDATE ON EBTAccount
 FOR EACH ROW
 DECLARE
     v_ThresholdBalance NUMBER := 10; 
-    v_account_holder_name VARCHAR(200);  
 BEGIN
     IF (:NEW.FoodBalance + :NEW.CashBalance)<= v_ThresholdBalance AND (:OLD.FoodBalance + :OLD.CashBalance) >= v_ThresholdBalance THEN      
-        SELECT U.FirstName ||' '|| U.LastName INTO v_account_holder_name
-        FROM EBTAccount A
-        JOIN EBTApplication AP
-        ON AP.ApplicationID = A.EBTApplication_ApplicationID
-        JOIN USERS U
-        ON U.UserID = AP.Users_UserID
-        WHERE AccountID = :NEW.AccountID;        
-        DBMS_OUTPUT.PUT_LINE('Low Balance Alert: Hi '||v_account_holder_name||', Your EBT account balance is below the threshold.');      
+        DBMS_OUTPUT.PUT_LINE('Low Balance Alert: Dear Customer, your EBT account ending with '||SUBSTR(:NEW.AccountNumber,-5) ||' has low balance.');      
     END IF;
 EXCEPTION
     WHEN OTHERS THEN
