@@ -443,3 +443,66 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
 END LowBalanceAlertTrigger;
 /
+
+---Report gives the no of transactions made and total amount spent on food at store and cash drawn at ATM by each customer
+
+CREATE OR REPLACE VIEW CUST_FOOD_VS_CASH_VIEW
+AS
+select ft.userid, ft.customer_name, ft.no_of_food_transactions, ft.food_amount_spent, at.no_of_atm_transactions, at.ATM_amount_spent
+from
+(select u.userid, u.firstname||' '||u.lastname customer_name, count(*) no_of_food_transactions, sum(t.amount) as food_amount_spent
+from transactions t
+left join ebtcard c
+on c.cardid = t.ebtcard_cardid
+left join ebtaccount a
+on a.accountid = c.ebtaccount_accountid
+left join ebtapplication ap
+on ap.applicationid = a.ebtapplication_applicationid
+left join users u
+on u.userid = ap.users_userid
+where t.merchant_merchantid in (select merchantid 
+                                from merchant 
+                                where type = 'Store')
+and t.status = 'SUCCESS'
+group by u.userid, u.firstname||' '||u.lastname) ft
+left join
+(select u.userid, u.firstname||' '||u.lastname customer_name,count(*) no_of_atm_transactions, sum(t.amount) as ATM_amount_spent
+from transactions t
+left join ebtcard c
+on c.cardid = t.ebtcard_cardid
+left join ebtaccount a
+on a.accountid = c.ebtaccount_accountid
+left join ebtapplication ap
+on ap.applicationid = a.ebtapplication_applicationid
+left join users u
+on u.userid = ap.users_userid
+where t.merchant_merchantid in (select merchantid 
+                                from merchant 
+                                where type = 'ATM')
+and t.status = 'SUCCESS'
+group by u.userid, u.firstname||' '||u.lastname) at
+on at.userid = ft.userid
+and at.customer_name = ft.customer_name
+order by userid;
+
+
+---Report gives the item wise total quantity and total amount
+
+CREATE OR REPLACE VIEW ITEM_QTY_VS_AMOUNT_VIEW
+AS
+select Item_Name, Item_price, sum(subtotal) total
+from transaction_summary_view
+group by Item_Name, Item_price
+order by total desc;
+
+--Report gives overall successful and failed transactions
+
+CREATE OR REPLACE VIEW COUNT_SUCCESS_FAIL_TRANSACTION_VIEW
+AS
+select 'SUCCESS' transaction_status , count(transactionid) no_of_transactions
+from transactions
+where status = 'SUCCESS'
+union all
+select 'FALIED' transaction_status, count(transactionid) no_of_transactions
+from transactions
+where status = 'FAILURE';
