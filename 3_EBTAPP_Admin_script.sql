@@ -101,4 +101,4 @@ GRANT EXECUTE ON CreatePin TO ebtuser;
 GRANT EXECUTE ON ResetPin TO ebtuser;
 GRANT EXECUTE ON LostCardAndDisable TO ebtadmin;
 
-
+GRANT EXECUTE ON user_management_pkg to ebtuser;
