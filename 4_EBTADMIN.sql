@@ -1,6 +1,6 @@
 -- As part of phase four all the admin flows will be showcased here
-ALTER SESSION SET CURRENT_SCHEMA = EBTADMIN;
-
+ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+SET SERVEROUTPUT ON;
 EXEC  ADDEBTSchedule('30');
 
 --Adding admins
@@ -58,7 +58,7 @@ exec AddOrUpdateItem('Kiwi', '876543210987', 3.25, 'tart and sweet', 'Y');
 exec AddOrUpdateItem('Peach', '765432109876', 7.50, 'stone fruit', 'Y');
 exec AddOrUpdateItem('Beer', '746892847893', 6.30, 'Alcohol', 'N');
 
-select * from item;
+--select * from item;
 
 --Updates in Item table if name exists
 exec AddOrUpdateItem('PEACH', '0293875178835', 5.99, 'stone fruit', 'Y');
@@ -116,7 +116,7 @@ EXEC updateAdminDetails(6, 'Ajay', '', 'admin@ajay.com', '1234567890');
 EXEC updateAdminDetails(6, 'Ajay', 'User', 'admin@ajay', '1234567890');
 
 -- Case 28: Valid admin ID and invalid phone number format
-EXEC updateAdminDetails(6, 'Ajay', 'User', 'admin@ajay.com', 'inva
+EXEC updateAdminDetails(6, 'Ajay', 'User', 'admin@ajay.com', 'inva');
 
-select * from admin;
-select *  from ebtschedule;
+--select * from admin;
+--select *  from ebtschedule;
