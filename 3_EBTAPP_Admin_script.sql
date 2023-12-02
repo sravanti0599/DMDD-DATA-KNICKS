@@ -59,9 +59,6 @@ GRANT SELECT ON VIEW_ADMIN TO EBTADMIN;
 
 GRANT EXECUTE ON insertAdmin TO ebtadmin;
 GRANT EXECUTE ON insertUser TO ebtuser;
-GRANT EXECUTE ON userLogin TO ebtuser;
-GRANT EXECUTE ON resetPassword TO ebtuser;
-GRANT EXECUTE ON updateUserDetails TO ebtuser;
 GRANT EXECUTE ON createEBTApplication TO ebtuser;
 GRANT EXECUTE ON updateEBTApplicationStatus TO ebtadmin;
 GRANT EXECUTE ON addEBTAccount TO ebtadmin;
