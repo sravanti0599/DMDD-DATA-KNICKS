@@ -310,13 +310,7 @@ SELECT * FROM TRANSACTIONS;
 
 --TODO : Should be moved to a single file
 
-<<<<<<< HEAD
-=======
 SET SERVEROUTPUT ON;
-
-
->>>>>>> 1a3178382cf76f37baec56e558b159cc0bebd55a
---FUNCTIONS
 
 CREATE OR REPLACE FUNCTION getAdminIdforAssignment RETURN EBTAPPLICATION.admin_adminid%TYPE IS
     v_random_admin_id EBTAPPLICATION.admin_adminid%TYPE;
@@ -1757,35 +1751,6 @@ JOIN
     view_ebtapplication eap on eap.applicationid = ec.ebtaccount_accountid
 JOIN 
     view_users u on u.userid = eap.users_userid;
-
-
---transaction_summary_view
-CREATE or replace VIEW transaction_summary_view AS
-SELECT
-    t.transactionid,
-    u.firstname,
-    u.email,
-    t.status,
-    t.recorded_date,
-    t.merchant_merchantid,
-    t.ebtcard_cardid,
-    til.quantity,
-    til.item_itemid,
-    i.name AS item_name,
-    i.price AS item_price,
-    (til.quantity * i.price) AS subtotal
-FROM
-    view_transactions t
-JOIN
-    view_transactionitemlist til ON t.transactionid = til.transactions_transactionid
-JOIN
-    view_item i ON til.item_itemid = i.itemid
-JOIN 
-    view_ebtcard ec on ec.cardid = t.ebtcard_cardid
-JOIN 
-    view_ebtapplication eap on eap.applicationid = ec.ebtaccount_accountid
-JOIN 
-    view_users u on u.userid = eap.users_userid;
     
     
 ---Report gives the item wise total quantity and total amount
@@ -1864,13 +1829,7 @@ FROM
     EBTAPPLICATION
 GROUP BY
     TO_CHAR(created_at, 'YYYY-MM');
-<<<<<<< HEAD
-=======
 
-
-    
->>>>>>> 1a3178382cf76f37baec56e558b159cc0bebd55a
-    
 --Analysis
 CREATE OR REPLACE VIEW age_view AS
 WITH age_categories AS (
@@ -1901,7 +1860,7 @@ FROM
 GROUP BY
     ac.age_category;
 
-<<<<<<< HEAD
+
 /*
  select * from transaction_summary_view;
  select * from ebtaccount_balance_view;
@@ -1909,13 +1868,7 @@ GROUP BY
  select * from monthly_application_counts;
  select * from age_view;
  */
-=======
--- select * from transaction_summary_view;
--- select * from ebtaccount_balance_view;
--- select * from pending_ebt_applications_view;
--- select * from monthly_application_counts;
--- select * from age_view;
->>>>>>> 1a3178382cf76f37baec56e558b159cc0bebd55a
+
  
 CREATE OR REPLACE VIEW card_status_counts AS
 SELECT
@@ -2081,18 +2034,10 @@ END user_management_pkg;
 
 
 
-<<<<<<< HEAD
-/*
-BEGIN
-    user_management_pkg.userLogin(416, 'Su5XdlEP');
-    user_management_pkg.resetPassword(414, 'Strong@Password123');
-END;
-/ */
-=======
---
+
 --BEGIN
 --    user_management_pkg.userLogin(416, 'Su5XdlEP');
 --    user_management_pkg.resetPassword(414, 'Strong@Password123');
 --END;
 --/
->>>>>>> 1a3178382cf76f37baec56e558b159cc0bebd55a
+
