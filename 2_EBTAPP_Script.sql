@@ -310,10 +310,6 @@ SELECT * FROM TRANSACTIONS;
 
 --TODO : Should be moved to a single file
 
-ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
-SET SERVEROUTPUT ON;
-
-
 --FUNCTIONS
 
 CREATE OR REPLACE FUNCTION getAdminIdforAssignment RETURN EBTAPPLICATION.admin_adminid%TYPE IS
@@ -1728,6 +1724,33 @@ on at.userid = ft.userid
 and at.customer_name = ft.customer_name
 order by userid;
 
+--transaction_summary_view
+CREATE or replace VIEW transaction_summary_view AS
+SELECT
+    t.transactionid,
+    u.firstname,
+    u.email,
+    t.status,
+    t.recorded_date,
+    t.merchant_merchantid,
+    t.ebtcard_cardid,
+    til.quantity,
+    til.item_itemid,
+    i.name AS item_name,
+    i.price AS item_price,
+    (til.quantity * i.price) AS subtotal
+FROM
+    view_transactions t
+JOIN
+    view_transactionitemlist til ON t.transactionid = til.transactions_transactionid
+JOIN
+    view_item i ON til.item_itemid = i.itemid
+JOIN 
+    view_ebtcard ec on ec.cardid = t.ebtcard_cardid
+JOIN 
+    view_ebtapplication eap on eap.applicationid = ec.ebtaccount_accountid
+JOIN 
+    view_users u on u.userid = eap.users_userid;
 
 ---Report gives the item wise total quantity and total amount
 
@@ -1805,36 +1828,6 @@ FROM
     EBTAPPLICATION
 GROUP BY
     TO_CHAR(created_at, 'YYYY-MM');
-
---transaction_summary_view
-CREATE or replace VIEW transaction_summary_view AS
-SELECT
-    t.transactionid,
-    u.firstname,
-    u.email,
-    t.status,
-    t.recorded_date,
-    t.merchant_merchantid,
-    t.ebtcard_cardid,
-    til.quantity,
-    til.item_itemid,
-    i.name AS item_name,
-    i.price AS item_price,
-    (til.quantity * i.price) AS subtotal
-FROM
-    view_transactions t
-JOIN
-    view_transactionitemlist til ON t.transactionid = til.transactions_transactionid
-JOIN
-    view_item i ON til.item_itemid = i.itemid
-JOIN 
-    view_ebtcard ec on ec.cardid = t.ebtcard_cardid
-JOIN 
-    view_ebtapplication eap on eap.applicationid = ec.ebtaccount_accountid
-JOIN 
-    view_users u on u.userid = eap.users_userid;
-    
-    
     
 --Analysis
 CREATE OR REPLACE VIEW age_view AS
@@ -1866,13 +1859,15 @@ FROM
 GROUP BY
     ac.age_category;
 
+/*
  select * from transaction_summary_view;
  select * from ebtaccount_balance_view;
  select * from pending_ebt_applications_view;
  select * from monthly_application_counts;
  select * from age_view;
+ */
  
-CREATE VIEW card_status_counts AS
+CREATE OR REPLACE VIEW card_status_counts AS
 SELECT
     COUNT(CASE WHEN statusofcard = 'LOST' THEN 1 END) AS lost_count,
     COUNT(CASE WHEN statusofcard = 'INACTIVE' THEN 1 END) AS inactive_count,
@@ -1882,7 +1877,7 @@ SELECT
 FROM
     ebtcard;
     
-SELECT * FROM card_status_counts;
+--SELECT * FROM card_status_counts;
 
 ----------------------------------
 
@@ -2036,9 +2031,9 @@ END user_management_pkg;
 
 
 
-
+/*
 BEGIN
     user_management_pkg.userLogin(416, 'Su5XdlEP');
     user_management_pkg.resetPassword(414, 'Strong@Password123');
 END;
-/
+/ */
