@@ -1327,6 +1327,7 @@ BEGIN
         INSERT INTO Item (ItemID, Name, UPC, Price, Description, Eligibility)
         VALUES (ITEM_SEQ.nextval, pi_Name, pi_UPC, pi_Price, pi_Description, pi_Eligibility);
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Item is inserted successfully!');
     ELSE
         -- Item exists, update the existing record
         UPDATE Item
@@ -1337,6 +1338,7 @@ BEGIN
             Eligibility = pi_Eligibility
         WHERE UPPER(Name) = UPPER(pi_Name);
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Item is updated successfully!');
     END IF;
 EXCEPTION
 	WHEN e_invalid_price THEN
@@ -1385,6 +1387,7 @@ BEGIN
         INSERT INTO Merchant (MerchantID, Type, Name, Address, AccountNumber, RoutingNumber, Archive)
         VALUES (MERCHANT_SEQ.nextval, pi_Type, pi_Name, pi_Address, pi_AccountNumber, pi_RoutingNumber, pi_Archive);
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Merchant is inserted successfully!');
     ELSE
         -- Merchant exists, update the existing record
         UPDATE Merchant
@@ -1396,6 +1399,7 @@ BEGIN
 			Archive = pi_Archive
         WHERE UPPER(Name) = UPPER(pi_Name);
         COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Merchant is updated successfully!');
     END IF;
 EXCEPTION
 	WHEN e_invalid_type THEN
@@ -1606,6 +1610,7 @@ BEGIN
                                 WHERE CardID = pi_CardID);
             
             COMMIT;
+            DBMS_OUTPUT.PUT_LINE('Transaction is successful');
         ELSE 
             RAISE e_insufficient_food_balance;
         END IF;
@@ -1613,7 +1618,7 @@ BEGIN
         -- Handle ineligible transaction
         INSERT INTO Transactions (TransactionID, Amount, Status, Recorded_Date, Merchant_MerchantID, EBTCard_CardID)
         VALUES (TRANSACTIONS_SEQ.nextval, v_amount, 'FAILURE', SYSDATE, pi_MerchantID, pi_CardID);
-        DBMS_OUTPUT.PUT_LINE('Transaction is not eligible.');
+        DBMS_OUTPUT.PUT_LINE('Transaction failed! It is not eligible.');
         COMMIT;
     END IF;
 EXCEPTION
@@ -1667,6 +1672,7 @@ BEGIN
                                 WHERE CardID = pi_CardID);
                                     
             COMMIT;
+            DBMS_OUTPUT.PUT_LINE('Transaction is successful');
         ELSE
             RAISE e_insufficient_cash_balance;
         END IF;
@@ -1674,7 +1680,7 @@ BEGIN
          -- Handle ineligible transaction
         INSERT INTO Transactions (TransactionID, Amount, Status, Recorded_Date, Merchant_MerchantID, EBTCard_CardID)
         VALUES (TRANSACTIONS_SEQ.nextval, pi_Amount, 'FAILURE', SYSDATE, pi_MerchantID, pi_CardID);
-        DBMS_OUTPUT.PUT_LINE('Transaction is not eligible.');
+        DBMS_OUTPUT.PUT_LINE('Transaction failed! It is not eligible.');
         COMMIT;
     END IF;
 EXCEPTION
