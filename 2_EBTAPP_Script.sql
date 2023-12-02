@@ -2032,13 +2032,3 @@ CREATE OR REPLACE PACKAGE BODY user_management_pkg AS
     END updateUserDetails;
 END user_management_pkg;
 /
-
-
-
-
---BEGIN
---    user_management_pkg.userLogin(416, 'Su5XdlEP');
---    user_management_pkg.resetPassword(414, 'Strong@Password123');
---END;
---/
-
