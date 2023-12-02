@@ -1405,6 +1405,28 @@ EXCEPTION
 END AddOrUpdateMerchant;
 /
 
+--ebtaccount_balance_view
+CREATE OR REPLACE VIEW ebtaccount_balance_view AS
+SELECT
+    ea.accountid,
+    ea.accountnumber,
+    u.firstname,
+    u.ssn,
+    ea.foodbalance,
+    ea.cashbalance,
+    ea.foodbalance + ea.cashbalance AS totalbalance
+FROM
+    VIEW_EBTACCOUNT ea
+JOIN 
+    view_ebtapplication eap
+ON 
+    ea.ebtapplication_applicationid = eap.applicationid
+JOIN 
+    view_users u
+ON
+    eap.users_userid = u.userid;
+    
+
 --function to check user balance
 CREATE OR REPLACE FUNCTION CheckUserBalance(pi_accountnumber VARCHAR) RETURN NUMBER
 AS
@@ -1775,27 +1797,6 @@ from transactions
 where status = 'FAILURE';
 
 --------------------------
-
---ebtaccount_balance_view
-CREATE OR REPLACE VIEW ebtaccount_balance_view AS
-SELECT
-    ea.accountid,
-    ea.accountnumber,
-    u.firstname,
-    u.ssn,
-    ea.foodbalance,
-    ea.cashbalance,
-    ea.foodbalance + ea.cashbalance AS totalbalance
-FROM
-    VIEW_EBTACCOUNT ea
-JOIN 
-    view_ebtapplication eap
-ON 
-    ea.ebtapplication_applicationid = eap.applicationid
-JOIN 
-    view_users u
-ON
-    eap.users_userid = u.userid;
 
 -- select * from ebtaccount_balance_view;
    
