@@ -312,9 +312,6 @@ SELECT * FROM TRANSACTIONS;
 
 SET SERVEROUTPUT ON;
 
-
---FUNCTIONS
-
 CREATE OR REPLACE FUNCTION getAdminIdforAssignment RETURN EBTAPPLICATION.admin_adminid%TYPE IS
     v_random_admin_id EBTAPPLICATION.admin_adminid%TYPE;
 BEGIN
@@ -1408,6 +1405,28 @@ EXCEPTION
 END AddOrUpdateMerchant;
 /
 
+--ebtaccount_balance_view
+CREATE OR REPLACE VIEW ebtaccount_balance_view AS
+SELECT
+    ea.accountid,
+    ea.accountnumber,
+    u.firstname,
+    u.ssn,
+    ea.foodbalance,
+    ea.cashbalance,
+    ea.foodbalance + ea.cashbalance AS totalbalance
+FROM
+    VIEW_EBTACCOUNT ea
+JOIN 
+    view_ebtapplication eap
+ON 
+    ea.ebtapplication_applicationid = eap.applicationid
+JOIN 
+    view_users u
+ON
+    eap.users_userid = u.userid;
+    
+
 --function to check user balance
 CREATE OR REPLACE FUNCTION CheckUserBalance(pi_accountnumber VARCHAR) RETURN NUMBER
 AS
@@ -1727,8 +1746,6 @@ on at.userid = ft.userid
 and at.customer_name = ft.customer_name
 order by userid;
 
-
-
 --transaction_summary_view
 CREATE or replace VIEW transaction_summary_view AS
 SELECT
@@ -1781,27 +1798,6 @@ where status = 'FAILURE';
 
 --------------------------
 
---ebtaccount_balance_view
-CREATE OR REPLACE VIEW ebtaccount_balance_view AS
-SELECT
-    ea.accountid,
-    ea.accountnumber,
-    u.firstname,
-    u.ssn,
-    ea.foodbalance,
-    ea.cashbalance,
-    ea.foodbalance + ea.cashbalance AS totalbalance
-FROM
-    VIEW_EBTACCOUNT ea
-JOIN 
-    view_ebtapplication eap
-ON 
-    ea.ebtapplication_applicationid = eap.applicationid
-JOIN 
-    view_users u
-ON
-    eap.users_userid = u.userid;
-
 -- select * from ebtaccount_balance_view;
    
 --pending_ebt_applications_view
@@ -1835,9 +1831,6 @@ FROM
 GROUP BY
     TO_CHAR(created_at, 'YYYY-MM');
 
-
-    
-    
 --Analysis
 CREATE OR REPLACE VIEW age_view AS
 WITH age_categories AS (
@@ -1868,11 +1861,15 @@ FROM
 GROUP BY
     ac.age_category;
 
--- select * from transaction_summary_view;
--- select * from ebtaccount_balance_view;
--- select * from pending_ebt_applications_view;
--- select * from monthly_application_counts;
--- select * from age_view;
+
+/*
+ select * from transaction_summary_view;
+ select * from ebtaccount_balance_view;
+ select * from pending_ebt_applications_view;
+ select * from monthly_application_counts;
+ select * from age_view;
+ */
+
  
 CREATE OR REPLACE VIEW card_status_counts AS
 SELECT
@@ -2038,9 +2035,10 @@ END user_management_pkg;
 
 
 
---
+
 --BEGIN
 --    user_management_pkg.userLogin(416, 'Su5XdlEP');
 --    user_management_pkg.resetPassword(414, 'Strong@Password123');
 --END;
 --/
+
