@@ -1728,6 +1728,36 @@ and at.customer_name = ft.customer_name
 order by userid;
 
 
+
+--transaction_summary_view
+CREATE or replace VIEW transaction_summary_view AS
+SELECT
+    t.transactionid,
+    u.firstname,
+    u.email,
+    t.status,
+    t.recorded_date,
+    t.merchant_merchantid,
+    t.ebtcard_cardid,
+    til.quantity,
+    til.item_itemid,
+    i.name AS item_name,
+    i.price AS item_price,
+    (til.quantity * i.price) AS subtotal
+FROM
+    view_transactions t
+JOIN
+    view_transactionitemlist til ON t.transactionid = til.transactions_transactionid
+JOIN
+    view_item i ON til.item_itemid = i.itemid
+JOIN 
+    view_ebtcard ec on ec.cardid = t.ebtcard_cardid
+JOIN 
+    view_ebtapplication eap on eap.applicationid = ec.ebtaccount_accountid
+JOIN 
+    view_users u on u.userid = eap.users_userid;
+    
+    
 ---Report gives the item wise total quantity and total amount
 
 CREATE OR REPLACE VIEW ITEM_QTY_VS_AMOUNT_VIEW
@@ -1805,34 +1835,7 @@ FROM
 GROUP BY
     TO_CHAR(created_at, 'YYYY-MM');
 
---transaction_summary_view
-CREATE or replace VIEW transaction_summary_view AS
-SELECT
-    t.transactionid,
-    u.firstname,
-    u.email,
-    t.status,
-    t.recorded_date,
-    t.merchant_merchantid,
-    t.ebtcard_cardid,
-    til.quantity,
-    til.item_itemid,
-    i.name AS item_name,
-    i.price AS item_price,
-    (til.quantity * i.price) AS subtotal
-FROM
-    view_transactions t
-JOIN
-    view_transactionitemlist til ON t.transactionid = til.transactions_transactionid
-JOIN
-    view_item i ON til.item_itemid = i.itemid
-JOIN 
-    view_ebtcard ec on ec.cardid = t.ebtcard_cardid
-JOIN 
-    view_ebtapplication eap on eap.applicationid = ec.ebtaccount_accountid
-JOIN 
-    view_users u on u.userid = eap.users_userid;
-    
+
     
     
 --Analysis
