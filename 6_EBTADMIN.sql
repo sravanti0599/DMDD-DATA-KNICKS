@@ -1,5 +1,5 @@
-ALTER SESSION SET CURRENT_SCHEMA = EBTADMIN;
-
+ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+SET SERVEROUTPUT ON
 
 exec updateEBTApplicationStatus(1,'APPROVED');
 --Same application cannot be rejected, once approved -- below will show the exception handling.
@@ -409,6 +409,40 @@ exec updateEBTApplicationStatus(400,'APPROVED');
 exec UpdateNextDisbursementDate('EBT Program MA');
 
 
+exec MarkAccountAndCardInactive('10000010000030');
+exec MarkAccountAndCardInactive('10000010000061');
+exec MarkAccountAndCardInactive('10000010000063');
+exec MarkAccountAndCardInactive('10000010000077');
+exec MarkAccountAndCardInactive('10000010000105');
+exec MarkAccountAndCardInactive('10000010000110');
+exec MarkAccountAndCardInactive('10000010000132');
+exec MarkAccountAndCardInactive('10000010000136');
+exec MarkAccountAndCardInactive('10000010000154');
+exec MarkAccountAndCardInactive('10000010000161');
+exec MarkAccountAndCardInactive('10000010000166');
+exec MarkAccountAndCardInactive('10000010000173');
+exec MarkAccountAndCardInactive('10000010000184');
+exec MarkAccountAndCardInactive('10000010000212');
+exec MarkAccountAndCardInactive('10000010000227');
+exec MarkAccountAndCardInactive('10000010000229');
+exec MarkAccountAndCardInactive('10000010000239');
+exec MarkAccountAndCardInactive('10000010000250');
+exec MarkAccountAndCardInactive('10000010000262');
+exec MarkAccountAndCardInactive('10000010000273');
+exec MarkAccountAndCardInactive('10000010000274');
+exec MarkAccountAndCardInactive('10000010000276');
+exec MarkAccountAndCardInactive('10000010000279');
+exec MarkAccountAndCardInactive('10000010000282');
+exec MarkAccountAndCardInactive('10000010000289');
+exec MarkAccountAndCardInactive('10000010000299');
+exec MarkAccountAndCardInactive('10000010000300');
+exec MarkAccountAndCardInactive('10000010000303');
+exec MarkAccountAndCardInactive('10000010000314');
+exec MarkAccountAndCardInactive('10000010000315');
+exec MarkAccountAndCardInactive('10000010000316');
+
+/*
 select * from ebtapplication;
 select * from ebtcard;
 select * from ebtaccount;
+*/

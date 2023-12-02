@@ -29,7 +29,6 @@ create user EBTADMIN identified by DataKnicks2023ADMIN;
 create user EBTMERCHANT identified by DataKnicks2023MERCH;
 create user EBTUSER identified by DataKnicks2023USER;
 
-
 GRANT CREATE SESSION TO EBTADMIN;
 GRANT CREATE SESSION TO EBTUSER;
 GRANT CREATE SESSION TO EBTMERCHANT;

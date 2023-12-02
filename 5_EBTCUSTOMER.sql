@@ -1,4 +1,5 @@
-ALTER SESSION SET CURRENT_SCHEMA = EBTUSER;
+ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+SET SERVEROUTPUT ON;
 
 exec insertUser('James', 'Butt', '448-70-3520', '6649 N Blue Gum St', '5048451427', 'jbutt@gmail.com', '15-11-1923', 'Dg2yquum');
 exec insertUser('Josephine', 'Darakjy', '290-08-6115', '4 B Blue Ridge Blvd', '8103749840', 'josephine_darakjy@darakjy.org', '24-07-1978', 'Wp1NrGyW');
@@ -908,8 +909,8 @@ EXEC createEBTApplication(utl_raw.cast_to_raw('proof of income'), utl_raw.cast_t
 
 
 
-select * from users;
-select * from ebtapplication;-- As part of phase four all the user flows will be showcased here
+--select * from users;
+--select * from ebtapplication;-- As part of phase four all the user flows will be showcased here
 
 -- User Login Procedure Test Cases
 -- Case 1: Valid user ID and valid password

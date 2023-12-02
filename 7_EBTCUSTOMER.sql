@@ -1,4 +1,5 @@
-ALTER SESSION SET CURRENT_SCHEMA = EBTUSER;
+ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+SET SERVEROUTPUT ON
 
 exec CreatePin('4000000000000209', 1464);
 exec CreatePin('4000000000000072', 4842);
@@ -258,78 +259,12 @@ exec CreatePin('4000000000000035', 5511);
 exec CreatePin('4000000000000045', 9115);
 exec CreatePin('4000000000000042', 3507);
 
-exec LostCardAndDisable('4000000000000066');
-exec LostCardAndDisable('4000000000000080');
-exec LostCardAndDisable('4000000000000134');
-exec LostCardAndDisable('4000000000000199');
-exec LostCardAndDisable('4000000000000210');
-exec LostCardAndDisable('4000000000000312');
-exec LostCardAndDisable('4000000000000214');
-exec LostCardAndDisable('4000000000000244');
-exec LostCardAndDisable('4000000000000104');
-exec LostCardAndDisable('4000000000000192');
-exec LostCardAndDisable('4000000000000223');
-exec LostCardAndDisable('4000000000000090');
-exec LostCardAndDisable('4000000000000062');
-exec LostCardAndDisable('4000000000000064');
-exec LostCardAndDisable('4000000000000074');
-exec LostCardAndDisable('4000000000000249');
-exec LostCardAndDisable('4000000000000235');
-exec LostCardAndDisable('4000000000000124');
-exec LostCardAndDisable('4000000000000290');
-exec LostCardAndDisable('4000000000000019');
-exec LostCardAndDisable('4000000000000269');
-exec LostCardAndDisable('4000000000000242');
-exec LostCardAndDisable('4000000000000008');
-exec LostCardAndDisable('4000000000000149');
-exec LostCardAndDisable('4000000000000137');
-exec LostCardAndDisable('4000000000000293');
-exec LostCardAndDisable('4000000000000071');
-exec LostCardAndDisable('4000000000000027');
-exec LostCardAndDisable('4000000000000128');
-exec LostCardAndDisable('4000000000000126');
-exec LostCardAndDisable('4000000000000158');
-
-
-
-exec MarkAccountAndCardInactive('10000010000030');
-exec MarkAccountAndCardInactive('10000010000061');
-exec MarkAccountAndCardInactive('10000010000063');
-exec MarkAccountAndCardInactive('10000010000077');
-exec MarkAccountAndCardInactive('10000010000105');
-exec MarkAccountAndCardInactive('10000010000110');
-exec MarkAccountAndCardInactive('10000010000132');
-exec MarkAccountAndCardInactive('10000010000136');
-exec MarkAccountAndCardInactive('10000010000154');
-exec MarkAccountAndCardInactive('10000010000161');
-exec MarkAccountAndCardInactive('10000010000166');
-exec MarkAccountAndCardInactive('10000010000173');
-exec MarkAccountAndCardInactive('10000010000184');
-exec MarkAccountAndCardInactive('10000010000212');
-exec MarkAccountAndCardInactive('10000010000227');
-exec MarkAccountAndCardInactive('10000010000229');
-exec MarkAccountAndCardInactive('10000010000239');
-exec MarkAccountAndCardInactive('10000010000250');
-exec MarkAccountAndCardInactive('10000010000262');
-exec MarkAccountAndCardInactive('10000010000273');
-exec MarkAccountAndCardInactive('10000010000274');
-exec MarkAccountAndCardInactive('10000010000276');
-exec MarkAccountAndCardInactive('10000010000279');
-exec MarkAccountAndCardInactive('10000010000282');
-exec MarkAccountAndCardInactive('10000010000289');
-exec MarkAccountAndCardInactive('10000010000299');
-exec MarkAccountAndCardInactive('10000010000300');
-exec MarkAccountAndCardInactive('10000010000303');
-exec MarkAccountAndCardInactive('10000010000314');
-exec MarkAccountAndCardInactive('10000010000315');
-exec MarkAccountAndCardInactive('10000010000316');
-
 exec ResetPin('4000000000000317', 4037);
 exec ResetPin('4000000000000155', 3880);
 exec ResetPin('4000000000000195', 4183);
 exec ResetPin('4000000000000260',8118);
 
-select * from ebtcard;
+--select * from ebtcard;
 
 -- SUCCESS transaction at Store
 exec InitiateTransactionAtStore(4,5,4,2);
@@ -341,8 +276,8 @@ exec InitiateTransactionAtStore(10,1,3,3);
 exec InitiateTransactionAtStore(10,4,8,2);
 
 --FAILURE transaction at Store
-exec InitiateTransactionAtStore(3,3,6,3); --item is not eligible
-exec InitiateTransactionAtStore(5,6,10,5); --merchant is invalid at Store
+exec InitiateTransactionAtStore(3,3,6,3);
+exec InitiateTransactionAtStore(5,6,10,5); 
 
 --SUCCESS transaction at ATM (MerchantID - 2 and 6 are ATMs)
 exec InitiateTransactionAtATM(4,2,10);
@@ -350,4 +285,4 @@ exec InitiateTransactionAtATM(10,6,5);
 exec InitiateTransactionAtATM(16,6,195);
 
 --FAILURE transaction at ATM
-exec InitiateTransactionAtATM(4,3,10); --merchant is invalid at ATM
+exec InitiateTransactionAtATM(4,3,10); 
