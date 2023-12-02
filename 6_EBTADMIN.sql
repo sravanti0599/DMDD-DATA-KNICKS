@@ -441,6 +441,38 @@ exec MarkAccountAndCardInactive('10000010000314');
 exec MarkAccountAndCardInactive('10000010000315');
 exec MarkAccountAndCardInactive('10000010000316');
 
+exec LostCardAndDisable('4000000000000066');
+exec LostCardAndDisable('4000000000000080');
+exec LostCardAndDisable('4000000000000134');
+exec LostCardAndDisable('4000000000000199');
+exec LostCardAndDisable('4000000000000210');
+exec LostCardAndDisable('4000000000000312');
+exec LostCardAndDisable('4000000000000214');
+exec LostCardAndDisable('4000000000000244');
+exec LostCardAndDisable('4000000000000104');
+exec LostCardAndDisable('4000000000000192');
+exec LostCardAndDisable('4000000000000223');
+exec LostCardAndDisable('4000000000000090');
+exec LostCardAndDisable('4000000000000062');
+exec LostCardAndDisable('4000000000000064');
+exec LostCardAndDisable('4000000000000074');
+exec LostCardAndDisable('4000000000000249');
+exec LostCardAndDisable('4000000000000235');
+exec LostCardAndDisable('4000000000000124');
+exec LostCardAndDisable('4000000000000290');
+exec LostCardAndDisable('4000000000000019');
+exec LostCardAndDisable('4000000000000269');
+exec LostCardAndDisable('4000000000000242');
+exec LostCardAndDisable('4000000000000008');
+exec LostCardAndDisable('4000000000000149');
+exec LostCardAndDisable('4000000000000137');
+exec LostCardAndDisable('4000000000000293');
+exec LostCardAndDisable('4000000000000071');
+exec LostCardAndDisable('4000000000000027');
+exec LostCardAndDisable('4000000000000128');
+exec LostCardAndDisable('4000000000000126');
+exec LostCardAndDisable('4000000000000158');
+
 /*
 select * from ebtapplication;
 select * from ebtcard;
