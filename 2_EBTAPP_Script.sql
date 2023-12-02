@@ -1,4 +1,4 @@
-ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
+--ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
 
 SET SERVEROUTPUT ON
 BEGIN
@@ -310,7 +310,6 @@ SELECT * FROM TRANSACTIONS;
 
 --TODO : Should be moved to a single file
 
-ALTER SESSION SET CURRENT_SCHEMA = EBTAPP;
 SET SERVEROUTPUT ON;
 
 
@@ -1866,13 +1865,13 @@ FROM
 GROUP BY
     ac.age_category;
 
- select * from transaction_summary_view;
- select * from ebtaccount_balance_view;
- select * from pending_ebt_applications_view;
- select * from monthly_application_counts;
- select * from age_view;
+-- select * from transaction_summary_view;
+-- select * from ebtaccount_balance_view;
+-- select * from pending_ebt_applications_view;
+-- select * from monthly_application_counts;
+-- select * from age_view;
  
-CREATE VIEW card_status_counts AS
+CREATE OR REPLACE VIEW card_status_counts AS
 SELECT
     COUNT(CASE WHEN statusofcard = 'LOST' THEN 1 END) AS lost_count,
     COUNT(CASE WHEN statusofcard = 'INACTIVE' THEN 1 END) AS inactive_count,
@@ -1882,7 +1881,7 @@ SELECT
 FROM
     ebtcard;
     
-SELECT * FROM card_status_counts;
+--SELECT * FROM card_status_counts;
 
 ----------------------------------
 
@@ -2036,9 +2035,9 @@ END user_management_pkg;
 
 
 
-
-BEGIN
-    user_management_pkg.userLogin(416, 'Su5XdlEP');
-    user_management_pkg.resetPassword(414, 'Strong@Password123');
-END;
-/
+--
+--BEGIN
+--    user_management_pkg.userLogin(416, 'Su5XdlEP');
+--    user_management_pkg.resetPassword(414, 'Strong@Password123');
+--END;
+--/
